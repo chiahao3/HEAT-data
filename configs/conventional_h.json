@@ -1,0 +1,116 @@
+{
+  "script": "scripts/ordinary_genetic_scripts/ordinary_genetic_H_sublattice.py",
+  "config": {
+    "paths": {
+      "eat_source_script": "scripts/eat_genetic_scripts/eat_genetic_08.27.26_H_sublattice.py",
+      "output_dir": "runs/conventional/h",
+      "import_structures_json": ""
+    },
+    "model": {
+      "mp_api_key": "",
+      "model_name": "uma-s-1p1",
+      "task_name": "omat",
+      "device": "cuda"
+    },
+    "crystal": {
+      "ground_truth_file": "inputs/MgB2H8/cm803019e_si_003.cif",
+      "material_id": "",
+      "material_formula": "MgB2H8",
+      "species": "Mg, B, H",
+      "variable_species": "H",
+      "supercell": "1, 1, 1",
+      "feasible_grid": "16, 16, 48",
+      "feasible_min_distance_angstrom": 1.0,
+      "initial_h_h_min_distance_angstrom": 1.0,
+      "pbc": "true, true, true"
+    },
+    "ground_truth_relaxation": {
+      "fmax": 0.05,
+      "steps": 200,
+      "maxstep": 0.1,
+      "relax_cell": true,
+      "relax_supercell": false
+    },
+    "initialization": {
+      "null_density_per_angstrom3": 0.15,
+      "subcell_grid": "4, 4, 16",
+      "init_occ_total": 1.0,
+      "init_occ_noise": 0.05,
+      "init_species_dirichlet_alpha": 5.0,
+      "init_position_mode": "feasible_grid",
+      "init_position_jitter_angstrom": 0.15,
+      "keep_thresh": 0.001,
+      "seed": 76348
+    },
+    "objective": {
+      "composition_penalty": 5.0,
+      "hole_boundary_penalty": 0.0,
+      "hole_boundary_margin_angstrom": 0.0,
+      "occupancy_lower_bound_enable": false,
+      "occupancy_lower_bound_gamma": 0.7,
+      "occupancy_lower_bound_penalty": 0.05,
+      "occupancy_lower_bound_softplus_sharpness": 1.0
+    },
+    "candidate_relaxation": {
+      "fmax": 0.05,
+      "steps": 500,
+      "maxstep_angstrom": 0.1,
+      "unconverged_penalty": 0.0
+    },
+    "hard_atom_genetic": {
+      "parent_selection": "tournament",
+      "mutation_probability": 0.3,
+      "rattle_weight": 0.5,
+      "relocate_weight": 0.5,
+      "insert_weight": 0.0,
+      "delete_weight": 0.0,
+      "rattle_atom_fraction": 0.2,
+      "initial_count_mode": "fixed",
+      "initial_count_min": 1,
+      "initial_count_max_factor": 1.0,
+      "repair_attempts": 2000
+    },
+    "genetic": {
+      "enable": true,
+      "population_size": 30,
+      "generations": 100,
+      "elite_fraction": 0.2,
+      "crossover_fraction": 0.7,
+      "random_fraction": 0.1,
+      "parent_pool_size": 30,
+      "import_parent_count": 0,
+      "parent_a_tournament_size": 3,
+      "superposition_prune_distance_angstrom": 1.0,
+      "crossover_pos_sigma": 0.2,
+      "live_plot_enable": true,
+      "live_plot_file": "",
+      "live_plot_metric": "score",
+      "live_plot_alpha": 0.45,
+      "live_plot_jitter": 0.16,
+      "parallel_workers": 2,
+      "parallel_gpu_ids": "0,1",
+      "execution_backend": "local",
+      "log_file": ""
+    },
+    "runtime": {
+      "terminal_verbose": true,
+      "heartbeat_interval_seconds": 100.0,
+      "running_log_file": ""
+    }
+  },
+  "repository_paths": [
+    [
+      "paths",
+      "eat_source_script"
+    ],
+    [
+      "paths",
+      "output_dir"
+    ],
+    [
+      "crystal",
+      "ground_truth_file"
+    ]
+  ],
+  "source_record": "parameters/ordinary/H_sublatt/run_parameters.json"
+}

@@ -1,0 +1,37 @@
+test_new_code_run_can_be_extended (test_ga_generation_extension.ExtensionTests.test_new_code_run_can_be_extended) ... [ga checkpoint] verified compatible code/settings; preserving the existing fingerprint (original limit=100, requested limit=200)
+ok
+test_old_checkpoint_extend_and_restore_all_completed (test_ga_generation_extension.ExtensionTests.test_old_checkpoint_extend_and_restore_all_completed) ... [ga checkpoint] verified compatible code/settings; preserving the existing fingerprint (original limit=100, requested limit=200)
+[ga checkpoint] verified compatible code/settings; preserving the existing fingerprint (original limit=100, requested limit=200)
+ok
+test_old_completed_run_still_accepts_100 (test_ga_generation_extension.ExtensionTests.test_old_completed_run_still_accepts_100) ... [ga checkpoint] verified compatible code/settings; preserving the existing fingerprint (original limit=100, requested limit=100)
+ok
+test_reject_changed_assets_and_lower_limits (test_ga_generation_extension.ExtensionTests.test_reject_changed_assets_and_lower_limits) ... ok
+test_reject_changed_science_even_after_prior_acceptance (test_ga_generation_extension.ExtensionTests.test_reject_changed_science_even_after_prior_acceptance) ... [ga checkpoint] verified compatible code/settings; preserving the existing fingerprint (original limit=100, requested limit=200)
+ok
+test_reject_unknown_code_or_corrupted_generation (test_ga_generation_extension.ExtensionTests.test_reject_unknown_code_or_corrupted_generation) ... [ga checkpoint] verified compatible code/settings; preserving the existing fingerprint (original limit=100, requested limit=200)
+ok
+test_slurm_worker_fingerprint_matches_controller (test_ga_generation_extension.ExtensionTests.test_slurm_worker_fingerprint_matches_controller) ... [ga checkpoint] verified compatible code/settings; preserving the existing fingerprint (original limit=100, requested limit=200)
+ok
+test_unchanged_limit_and_partial_generation (test_ga_generation_extension.ExtensionTests.test_unchanged_limit_and_partial_generation) ... [ga checkpoint] verified compatible code/settings; preserving the existing fingerprint (original limit=101, requested limit=200)
+ok
+test_extra_z_padding_preserves_measured_field (test_gaussian_09_30.GaussianTests.test_extra_z_padding_preserves_measured_field) ... ok
+test_gaussian_symmetry_mass_and_no_envelope (test_gaussian_09_30.GaussianTests.test_gaussian_symmetry_mass_and_no_envelope) ... ok
+test_invalid_sigma (test_gaussian_09_30.GaussianTests.test_invalid_sigma) ... ok
+test_isolated_w_peak_and_overlapping_atoms (test_gaussian_09_30.GaussianTests.test_isolated_w_peak_and_overlapping_atoms) ... ok
+test_obsolete_gain_is_rejected (test_gaussian_09_30.GaussianTests.test_obsolete_gain_is_rejected) ... ok
+test_production_config_box_prefit_serialization_checkpoint (test_gaussian_09_30.GaussianTests.test_production_config_box_prefit_serialization_checkpoint) ... ok
+test_slice_count_validation_and_30_slice_support (test_gaussian_09_30.GaussianTests.test_slice_count_validation_and_30_slice_support) ... ok
+test_species_mass_additivity_and_xyz_occupancy_gradients (test_gaussian_09_30.GaussianTests.test_species_mass_additivity_and_xyz_occupancy_gradients) ... ok
+test_configurable_population_import_limits_and_empty_path (test_ga_import_seeding.ImportSeedingTests.test_configurable_population_import_limits_and_empty_path) ... ok
+test_imports_seed_first_generation_with_either_constructor (test_ga_import_seeding.ImportSeedingTests.test_imports_seed_first_generation_with_either_constructor) ... ok
+test_resume_partial_generation_zero_preserves_import_slots (test_ga_import_seeding.ImportSeedingTests.test_resume_partial_generation_zero_preserves_import_slots) ... ok
+test_allocation_and_missing_donors (test_ga_mutations.MutationTests.test_allocation_and_missing_donors) ... ok
+test_live_plot_colors (test_ga_mutations.MutationTests.test_live_plot_colors) ... ok
+test_resume_during_donors_and_after_one_mutation (test_ga_mutations.MutationTests.test_resume_during_donors_and_after_one_mutation) ... ok
+test_serial_parallel_and_slurm_have_identical_mutation_parents (test_ga_mutations.MutationTests.test_serial_parallel_and_slurm_have_identical_mutation_parents) ... ok
+test_slurm_phases_do_not_overwrite_each_other (test_ga_mutations.MutationTests.test_slurm_phases_do_not_overwrite_each_other) ... ok
+
+----------------------------------------------------------------------
+Ran 24 tests in 5.444s
+
+OK

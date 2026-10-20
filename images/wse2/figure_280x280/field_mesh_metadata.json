@@ -1,0 +1,21 @@
+{
+  "vertices": 142318,
+  "triangles": 0,
+  "quads": 140898,
+  "normalized_isovalue": 0.2,
+  "raw_isovalue": 0.024725361168384554,
+  "bounds_centered_xyz_A": [
+    [
+      -21.435242000000002,
+      -21.435242000000002,
+      -6.5
+    ],
+    [
+      21.282677999999997,
+      21.282677999999997,
+      5.5
+    ]
+  ],
+  "policy": "Direct measured voxels, one global threshold, no Gaussian fitting, no spatial smoothing, no component filtering, no depth exaggeration.",
+  "boundary_policy": "Outside measured support is zero for meshing; surfaces are clipped at the measured sample bounds. Boundary caps are display closures, not inferred experimental depth structure."
+}

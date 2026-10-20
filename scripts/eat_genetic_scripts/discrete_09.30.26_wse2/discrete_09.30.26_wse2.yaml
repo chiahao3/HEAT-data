@@ -1,0 +1,90 @@
+# Recorded run settings; paths made portable for this repository.
+# Prefer the root run_search.py launcher, which resolves paths independently of cwd.
+paths:
+  output_dir: "../../../runs/conventional/wse2"
+  import_structures_json: ""
+  element_fit_csv: "element_double_gaussian_fits.csv"
+model:
+  model_name: "uma-s-1p1"
+  task_name: "omat"
+  reference_energies_json: ""
+system:
+  vacuum_padding_angstrom: "8.0, 8.0, 8.0"
+  pbc: "true, true, true"
+experimental:
+  tiff_file: "../../../inputs/ptycho_data/objp_zstack_iter0200.tif"
+  crop_xy_size_source_pixels: 320
+  target_xy_pixels: 320
+  target_z_slices: 12
+  source_voxel_size_angstrom: "1.0, 0.152564, 0.152564"
+  target_background_percentile: 1.0
+  target_normalization_percentile: 99.5
+feasible_region:
+  mask_smoothing_sigma_pixels: "0.5, 1.0, 1.0"
+  threshold_mode: "percentile"
+  threshold: 50.0
+  candidate_site_density_per_angstrom3: 0.2
+  cylinder_lateral_radius_angstrom: 0.75
+  cylinder_z_radius_angstrom: 3.0
+  jitter_angstrom: 0.1
+sample_box:
+  z_min_angstrom: 0.0
+  z_max_angstrom: 12.0
+  confinement_penalty: 50.0
+  confinement_sharpness: 8.0
+  confinement_margin_angstrom: 0.0
+imaging:
+  shared_sigma_z_angstrom: 4.0
+  additional_lateral_blur_angstrom: 0.08
+  penalty: 10.0
+  huber_delta: 0.2
+  target_transform: "linear"
+  transform_epsilon: 1e-06
+  clip_experimental_to_unit_interval: false
+composition:
+  target: "1, 2"
+  penalty: 10.0
+initialization:
+  mean_atom_count: 1500
+  occupied_probability: 0.3
+  seed: null
+hard_atoms:
+  minimum_distance_angstrom: 1.0
+  minimum_count: 1
+  maximum_count: null
+  repair_attempts: 2000
+mutation:
+  probability: 0.3
+  rattle_weight: 0.35
+  relocate_weight: 0.25
+  insert_weight: 0.2
+  delete_weight: 0.2
+  transmute_weight: 0.0
+  rattle_atom_fraction: 0.2
+  rattle_sigma_angstrom: 0.25
+relaxation:
+  max_iterations: 500
+  gradient_tolerance: 0.003
+  bfgs_history: 8
+  max_line_search: 10
+  cost_plateau_tolerance: 0.0003
+  cost_plateau_patience: 10
+  cost_plateau_min_iterations: 50
+genetic:
+  population_size: 50
+  generations: 200
+  elite_fraction: 0.1
+  random_fraction: 0.25
+  crossover_fraction: 0.65
+  parent_pool_size: 50
+  parent_a_tournament_size: 4
+  parent_b_tournament_size: 2
+  import_parent_count: 0
+  live_plot_enable: true
+runtime:
+  device: "auto"
+  parallel_workers: 1
+  gpu_ids: "1"
+  cpu_threads: 4
+  checkpoint_interval_iterations: 10
+  heartbeat_seconds: 60.0

@@ -1,0 +1,147 @@
+# Recorded run settings; paths made portable for this repository.
+# Prefer the root run_search.py launcher, which resolves paths independently of cwd.
+paths:
+  output_dir: "runs/heat/wse2"
+  import_structures_json: ""
+model:
+  mp_api_key: ""
+  model_name: "uma-s-1p1"
+  task_name: "omat"
+system:
+  vacuum_padding_angstrom: "8.0, 8.0, 8.0"
+  pbc: "true, true, true"
+  species: "W, Se"
+experimental:
+  tiff_file: "../../../inputs/ptycho_data/objp_zstack_iter0200.tif"
+  crop_xy_size_source_pixels: 320
+  target_xy_pixels: 320
+  target_z_slices: 12
+  source_voxel_size_angstrom: "1.0, 0.152564, 0.152564"
+  target_background_percentile: 1.0
+  target_normalization_percentile: 99.5
+feasible_region:
+  mask_smoothing_sigma_pixels: "0.5, 1.0, 1.0"
+  threshold_mode: "percentile"
+  threshold: 50.0
+  level_set_margin_angstrom: 0.0
+  boundary_penalty: 0.0
+  boundary_sharpness: 8.0
+sample_box:
+  z_min_angstrom: 0.0
+  z_max_angstrom: 12.0
+  confinement_penalty: 50.0
+  confinement_sharpness: 8.0
+  confinement_margin_angstrom: 0.0
+imaging:
+  shared_sigma_z_angstrom: 4.0
+  penalty: 10.0
+  huber_delta: 0.2
+  target_transform: "linear"
+  transform_epsilon: 1e-06
+  epsilon: 1e-12
+  relative_intensity_reference_species: "W"
+  normalize_relative_intensity_reference_peak_to_one: true
+  clip_experimental_to_unit_interval: false
+  additional_lateral_blur_angstrom: 0.08
+random_immigrant_image_prefit:
+  enable: true
+  initial_occupancy_mode: "uniform"
+  initial_logit_noise: 0.2
+  soft_steps: 500
+  final_position_steps: 0
+  position_learning_rate: 0.025
+  occupancy_learning_rate: 0.07
+  entropy_final_weight: 1.0
+  repulsion_weight: 2.0
+  minimum_distance_angstrom: 1.0
+  composition_penalty_enable: true
+  compact_null_sites_before_fairchem: false
+diagnostics:
+  initial_diagnostics_enable: true
+  exit_after_initial_diagnostics: false
+  max_isosurface_points: 60000
+  member_slice_comparisons_enable: false
+effective_atoms:
+  candidate_site_density_per_angstrom3: 0.2
+  initial_cylinder_lateral_radius_angstrom: 0.75
+  initial_cylinder_z_radius_angstrom: 3.0
+  initial_jitter_angstrom: 0.1
+composition:
+  composition_target: "1, 2"
+  composition_penalty: 10.0
+  exact_composition_enforcement_enable: false
+se_vacancy_bias:
+  enable: false
+  alpha_eV_per_vacancy: 1.8353
+  reference_atom_count: 350.0
+syntropization:
+  tsallis_q: 2.0
+  beta0: 0.001
+  beta_mult: 1.5
+  beta_max_stages: 0
+  entropy_stop_avg: 0.001
+  binary_stop_maxmin: 0.001
+  also_require_binary_stop: false
+minimizer:
+  maxit: 100
+  tol: 0.03
+  bfgs_hist: 8
+  max_line_search: 10
+  stage_stagnation_patience: 5
+  stage_stagnation_min_improvement: 0.003
+  final_pbfgs_enable: true
+  final_pbfgs_maxit: 500
+  final_pbfgs_tol: 0.003
+  final_pbfgs_cost_plateau_tol: 0.0003
+  final_pbfgs_cost_plateau_patience: 10
+  final_pbfgs_cost_plateau_min_iterations: 50
+initialization:
+  init_occ_total: 0.3
+  init_occ_noise: 0.05
+  init_species_mode: "dirichlet"
+  init_species_dirichlet_alpha: 5.0
+  keep_thresh: 0.001
+  seed: null
+history:
+  disable_trajectory_history: true
+  history_every: 1
+runtime:
+  terminal_verbose: false
+  heartbeat_interval_seconds: 60.0
+  running_log_file: ""
+  local_resource_log_interval_seconds: 60.0
+  worker_health_check_interval_seconds: 10.0
+checkpointing:
+  member_progress_enable: true
+  member_progress_interval_iterations: 10
+  member_progress_interval_seconds: 60.0
+  retain_completed_member_checkpoints: false
+genetic:
+  enable: true
+  population_size: 50
+  generations: 200
+  elite_fraction: 0.1
+  random_fraction: 0.25
+  crossover_fraction: 0.65
+  mutation_fraction: 0.0
+  parent_pool_size: 50
+  import_parent_count: 0
+  crossover_pos_sigma: 0.25
+  crossover_occ_sigma: 0.05
+  crossover_species_sigma: 0.25
+  parent_a_tournament_size: 4
+  parent_b_tournament_size: 2
+  diversity_subcells: "12, 12, 4"
+  superposition_occ_scale: 0.5
+  superposition_prune_distance_angstrom: 1.0
+  superposition_prune_occ_thresh: 0.001
+  live_plot_enable: true
+  live_plot_file: ""
+  live_plot_metric: "score"
+  live_plot_alpha: 0.45
+  live_plot_jitter: 0.16
+  parallel_workers: 1
+  parallel_gpu_ids: "0"
+  execution_backend: "local"
+  log_file: ""
+  score: "guided"

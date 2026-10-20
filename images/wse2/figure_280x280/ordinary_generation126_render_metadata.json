@@ -1,0 +1,29 @@
+{
+  "generation": 126,
+  "member_index": 30,
+  "source_xsf": "xsfs/wse2/xsfs_wse2_ordinary/generation_0126_best_loss.xsf",
+  "source_xsf_sha256": "a2b24b74edb23178fcf91f088cb42639aac8da14b65f89c7d32937205d6dcca4",
+  "renderer": "scripts/eat_genetic_scripts/genetic_09.30.26_wse2/gaussian_image_model.py",
+  "original_export_reproduction_max_abs_error": 3.5762786865234375e-07,
+  "atom_count": 1298,
+  "cropped_atom_count": 980,
+  "score": 0.03183615518930709,
+  "formation_energy_per_atom": -0.07901207820296581,
+  "saved_weighted_image_penalty": 0.10578792542219162,
+  "rerendered_weighted_image_penalty": 0.10578847676515579,
+  "cropped_image_huber_mean": 0.010547286830842495,
+  "cropped_zsum_correlation": 0.122609107966686,
+  "output_tiff": "xsfs/wse2/xsfs_wse2_ordinary/images/generation_0126_reconstructed_zsum_cropped_280x280.tif",
+  "display_scale": [
+    -0.000406916078645736,
+    1.9617524147033691
+  ],
+  "assembled_figure_data_box_xyxy": [
+    3840,
+    1681,
+    4747,
+    2589
+  ],
+  "assembled_figure_before_sha256": "3742b87049af8b9b15d62820ca145a88a42c51851d8c7152a5c51ea133e6137d",
+  "assembled_figure_after_sha256": "143297409fc5265b5b904599b1fa4b1b69c7e768458d331f17303f3405c09f58"
+}

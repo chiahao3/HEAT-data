@@ -1,0 +1,8 @@
+test_configurable_population_import_limits_and_empty_path (test_ga_import_seeding.ImportSeedingTests.test_configurable_population_import_limits_and_empty_path) ... ok
+test_imports_seed_first_generation_with_either_constructor (test_ga_import_seeding.ImportSeedingTests.test_imports_seed_first_generation_with_either_constructor) ... ok
+test_resume_partial_generation_zero_preserves_import_slots (test_ga_import_seeding.ImportSeedingTests.test_resume_partial_generation_zero_preserves_import_slots) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.124s
+
+OK

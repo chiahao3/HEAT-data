@@ -1,0 +1,10 @@
+{
+  "final_W_sixfold_orientation_modulo_60_degrees": [
+    -8.160574375248643,
+    -11.02735893577916
+  ],
+  "final_W_relative_twist_modulo_60_degrees": -2.866784560530519,
+  "same_cell": true,
+  "same_composition": true,
+  "atoms": 1517
+}

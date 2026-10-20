@@ -1,0 +1,19 @@
+{
+  "camera": {
+    "horizontal_span_A": 54.0,
+    "vertical_span_A": 20.25,
+    "center_experimental_xyz_A": [
+      24.41024,
+      24.41024,
+      6.0
+    ],
+    "image_size": [
+      3200,
+      1200
+    ],
+    "direction": "+y"
+  },
+  "final_xsf": "xsfs/wse2/xsfs_wse2_EAT/best_cropped_320x320.xsf",
+  "final_atoms": 1497,
+  "measured_lateral_size_A": 48.82048
+}

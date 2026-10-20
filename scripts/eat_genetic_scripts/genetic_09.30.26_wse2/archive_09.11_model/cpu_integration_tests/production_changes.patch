@@ -1,0 +1,1225 @@
+--- original/genetic_09.01.26_wse2.py
++++ genetic_09.01.26_wse2.py
+@@ -2,17 +2,7 @@
+-"""Periodic W/Se/null EAT optimization against a twisted-bilayer WSe2 TIFF.
+-
+-The centered experimental crop defines an orthorhombic sample region. About
+-eight Angstrom of explicit vacuum is added on either side of x, y, and z while
+-all three FairChem cell directions remain periodic. The experimental volume is
+-embedded in the centered padded render grid, but image losses and correlations
+-are normalized only over the measured voxels, so vacuum never dilutes the image
+-objective. One effective
+-site class allows W, Se, or implicit null and is initialized from a permissive
+-intensity isosurface. The physical guided objective combines FairChem formation
+-energy, a soft WSe2 composition penalty, feasible-region confinement, a
+-species-resolved periodic double-Gaussian voxelwise image loss, and a local
+-W/Se occupancy square loss over halo-LoG/joint-fit adaptive ellipses. A
+-fixed-reference, calibrated Se-deficiency bias reduces the energy opposition to
+-Se vacancies without changing the reported conventional formation energy. A
+-separate occupancy-normalized sample-box term keeps real atoms out of the
+-explicit vacuum. No exact composition or formula-unit projection is performed.
++"""W/Se/null EAT with the calibrated 30-slice image model.
++
++FairChem retains xyz periodicity. Imaging is periodic only in xy, with native
++TIFF z vacuum and optional added padding. Atomic confinement uses explicit
++experimental z bounds independently of the measured image ROI. The guided
++objective combines formation energy, voxel Huber loss, soft 1:2 composition,
++and occupancy-weighted confinement. The depth-sum ellipse penalty is removed.
+@@ -51,0 +42 @@
++from calibrated_image_model import load_calibration, atomic_box_bounds, initialize_calibrated_renderer
+@@ -76,2 +67,2 @@
+-OUTPUT_DIR = "wse2_halo_log_ellipse_composition_ga"
+-VACUUM_PADDING_ANGSTROM = "8.0, 8.0, 8.0"
++OUTPUT_DIR = str(SCRIPT_DIR / "runs_30_slice_calibrated_150")
++VACUUM_PADDING_ANGSTROM = "8.0, 8.0, 0.0"
+@@ -87 +78 @@
+-SE_VACANCY_BIAS_ENABLE = True
++SE_VACANCY_BIAS_ENABLE = False
+@@ -174,6 +165 @@
+-EXPERIMENTAL_TIFF = str(
+-    MULLER_DIR
+-    / "muller_visualization"
+-    / "new_WSe2_data"
+-    / "objp_zstack_iter0200.tif"
+-)
++EXPERIMENTAL_TIFF = str(SCRIPT_DIR.parent / "chia-hao_data/objp_zstack_iter0001_30_slices.tif")
+@@ -183,2 +169,2 @@
+-TARGET_Z_SLICES = 12
+-HEAVY_SITE_DENSITY_PER_ANGSTROM3 = 0.50
++TARGET_Z_SLICES = 30
++HEAVY_SITE_DENSITY_PER_ANGSTROM3 = 0.20
+@@ -190 +176 @@
+-TARGET_NORMALIZATION_PERCENTILE = 98.0
++TARGET_NORMALIZATION_PERCENTILE = 99.5
+@@ -195 +181 @@
+-LEVEL_SET_BOUNDARY_PENALTY = 150.0
++LEVEL_SET_BOUNDARY_PENALTY = 0.0
+@@ -197 +183 @@
+-SAMPLE_BOX_CONFINEMENT_PENALTY = 0.01
++SAMPLE_BOX_CONFINEMENT_PENALTY = 50.0
+@@ -201,3 +187,3 @@
+-IMAGE_PENALTY = 50.0
+-IMAGE_HUBER_DELTA = 0.10
+-ELLIPSE_COMPOSITION_PENALTY = 50.0
++IMAGE_PENALTY = 100.0
++IMAGE_HUBER_DELTA = 0.20
++ELLIPSE_COMPOSITION_PENALTY = 0.0
+@@ -238 +224 @@
+-IMAGE_TARGET_TRANSFORM = "sqrt"
++IMAGE_TARGET_TRANSFORM = "linear"
+@@ -241 +227 @@
+-GAUSSIAN_ADDITIONAL_LATERAL_BLUR_A = 0.0
++GAUSSIAN_ADDITIONAL_LATERAL_BLUR_A = 0.08
+@@ -245 +231 @@
+-GAUSSIAN_NORMALIZE_RELATIVE_REFERENCE_PEAK_TO_ONE = True
++GAUSSIAN_NORMALIZE_RELATIVE_REFERENCE_PEAK_TO_ONE = False
+@@ -316,0 +303,2 @@
++        "z_min_angstrom": 7.0,
++        "z_max_angstrom": 23.0,
+@@ -318,0 +307 @@
++        "depth_calibration_file": str(SCRIPT_DIR / "calibration/accepted_30_slice_model.json"),
+@@ -331 +319,0 @@
+-        "shared_sigma_z_angstrom": GAUSSIAN_SHARED_SIGMA_Z_A,
+@@ -536,0 +525,2 @@
++        "z_min_angstrom": "sample_box_z_min_angstrom",
++        "z_max_angstrom": "sample_box_z_max_angstrom",
+@@ -538,0 +529 @@
++        "depth_calibration_file": "depth_calibration_file",
+@@ -551 +541,0 @@
+-        "shared_sigma_z_angstrom": "gaussian_shared_sigma_z_angstrom",
+@@ -1030,0 +1021,17 @@
++    calibration_path = Path(flat["depth_calibration_file"]).expanduser()
++    if not calibration_path.is_absolute():
++        calibration_path = SCRIPT_DIR / calibration_path
++    flat["depth_calibration_file"] = str(calibration_path.resolve())
++    calibration = load_calibration(calibration_path, fit_csv_path)
++    if float(flat["ellipse_composition_penalty"]) != 0.0:
++        raise ValueError("The depth-sum ellipse penalty has been removed; set it to zero or omit it.")
++    if flat["gaussian_normalize_relative_intensity_reference_peak_to_one"]:
++        raise ValueError("The calibrated model requires fixed gain, not unit-peak normalization.")
++    if flat["gaussian_relative_intensity_reference_species"] != "W":
++        raise ValueError("The accepted absolute calibration uses W as intensity reference.")
++    if flat["gaussian_clip_experimental_to_unit_interval"] or flat["image_target_transform"] != "linear":
++        raise ValueError("The calibrated model requires unclipped linear target intensities.")
++    if not np.isclose(float(flat["gaussian_additional_lateral_blur_angstrom"]), calibration["additional_lateral_blur_A"]):
++        raise ValueError("Lateral blur must match the accepted 0.08 A calibration.")
++    if int(flat["target_z_slices"]) != 30 or int(flat["target_xy_pixels"]) != int(flat["crop_xy_size_source_pixels"]):
++        raise ValueError("Use all 30 slices and native XY resolution with this calibration.")
+@@ -3505 +3512 @@
+-    """Prepare the centered WSe2 target inside an xyz-vacuum periodic cell."""
++    """Keep measured z vacuum and pad XY; atomic slab bounds are independent."""
+@@ -3535,0 +3543,5 @@
++    calibration = load_calibration(args.depth_calibration_file)
++    if source.shape[0] != 30 or target_nz != 30 or target_nxy != crop_size:
++        raise ValueError("Accepted calibration requires a native-resolution 30-slice TIFF.")
++    if not np.allclose(source_voxel_A, calibration["voxel_size_zyx_A"], rtol=0, atol=1e-8):
++        raise ValueError("Voxel spacing differs from accepted calibration.")
+@@ -3566,4 +3578,5 @@
+-    background = float(
+-        np.percentile(sample_linear, float(args.target_background_percentile))
+-    )
+-    sample_linear = np.maximum(sample_linear - background, 0.0)
++    # The accepted fit measured zero off-column background in every slice.
++    # Envelope attenuation is multiplicative and belongs in the renderer.
++    background_profile = np.asarray(calibration["background_per_slice"], dtype=float)
++    background = float(background_profile.mean())
++    sample_linear = np.maximum(sample_linear - background_profile[:, None, None], 0.0)
+@@ -3587,8 +3600,8 @@
+-    log_ellipse_regions = build_experimental_log_ellipse_regions(
+-        source,
+-        (y0, x0),
+-        crop_size,
+-        sample_linear_normalized,
+-        sample_voxel_A,
+-        args,
+-    )
++    # Empty legacy metadata keeps old serializers readable; no detection or loss.
++    log_ellipse_regions = {
++        "ellipses": [], "centers_xy_A": np.empty((0, 2)),
++        "semi_major_A": np.empty(0), "semi_minor_A": np.empty(0),
++        "angles_degrees": np.empty(0), "target_integrals": np.empty(0),
++        "halo": {}, "I_Se": 0.5824533131834269, "I_W": 1.0,
++        "database_W_to_Se_ratio": 1.0 / 0.5824533131834269,
++    }
+@@ -3620,0 +3634,4 @@
++    # Include vacuum in the image loss, but exclude it from candidate seeding.
++    atomic_lower, atomic_upper = atomic_box_bounds(args, sample_cell_lengths_A, np.zeros(3))
++    z_coordinates = np.arange(target_nz) * sample_voxel_A[0]
++    sample_feasible_mask &= ((z_coordinates >= atomic_lower[2]) & (z_coordinates <= atomic_upper[2]))[:, None, None]
+@@ -3758,5 +3775 @@
+-        write_log_ellipse_diagnostics(
+-            log_ellipse_regions,
+-            sample_voxel_A,
+-            output_dir,
+-        )
++
+@@ -3805,0 +3819 @@
++            "atomic_z_bounds_experimental_A": [float(atomic_lower[2]), float(atomic_upper[2])],
+@@ -3827,14 +3841 @@
+-            "ellipse_composition_loss": {
+-                "peak_detector": "scale_normalized_LoG_on_source_halo_then_crop_back",
+-                "region_count": int(len(log_ellipse_regions["ellipses"])),
+-                "region_definition": "joint_double_gaussian_unmixing_then_merged_responsibility_deblended_adaptive_ellipses",
+-                "target": "full_joint_fit_integrated_amplitude",
+-                "prediction": "smooth_ellipse_owned_W_and_Se_occupancy_times_I_W_and_I_Se",
+-                "loss": "mean_squared_residual_in_Se_intensity_units",
+-                "halo": log_ellipse_regions["halo"],
+-                "I_Se": float(log_ellipse_regions["I_Se"]),
+-                "I_W": float(log_ellipse_regions["I_W"]),
+-                "database_W_to_Se_ratio": float(
+-                    log_ellipse_regions["database_W_to_Se_ratio"]
+-                ),
+-            },
++            "ellipse_composition_loss": {"removed": True, "region_count": 0},
+@@ -4020,3 +4021,2 @@
+-        self.sample_box_lower_A = self.vacuum_position_shift.astype(float)
+-        self.sample_box_upper_A = (
+-            self.sample_box_lower_A + np.diag(self.original_cell).astype(float)
++        self.sample_box_lower_A, self.sample_box_upper_A = atomic_box_bounds(
++            args, np.diag(self.original_cell), self.vacuum_position_shift
+@@ -4182 +4182 @@
+-        self.ellipse_composition_penalty = float(args.ellipse_composition_penalty)
++        self.ellipse_composition_penalty = 0.0
+@@ -4212,0 +4213 @@
++        self.calibrated_element_fits = element_fits
+@@ -4261 +4261,0 @@
+-        self.gaussian_shared_sigma_z_A = float(args.gaussian_shared_sigma_z_angstrom)
+@@ -4283,92 +4283 @@
+-        if not np.isfinite(self.gaussian_shared_sigma_z_A) or self.gaussian_shared_sigma_z_A <= 0.0:
+-            raise ValueError("imaging.shared_sigma_z_angstrom must be finite and positive.")
+-        gaussian_kernels = []
+-        for species_sigmas_xy_A in self.gaussian_sigma_xy_A:
+-            species_kernels = []
+-            for sigma_xy_A in species_sigmas_xy_A:
+-                species_kernels.append(
+-                    periodic_gaussian_fourier_kernel(
+-                        self.target_shape_zyx,
+-                        (
+-                            self.gaussian_shared_sigma_z_A
+-                            / self.target_voxel_size_A[0],
+-                            sigma_xy_A / self.target_voxel_size_A[1],
+-                            sigma_xy_A / self.target_voxel_size_A[2],
+-                        ),
+-                        self.device,
+-                        self.dtype,
+-                    )
+-                )
+-            gaussian_kernels.append(torch.stack(species_kernels, dim=0))
+-        self.gaussian_fourier_kernels_t = torch.stack(gaussian_kernels, dim=0)
+-        spatial_kernels = torch.fft.ifftn(
+-            self.gaussian_fourier_kernels_t, dim=(-3, -2, -1)
+-        ).real.clamp_min(0.0)
+-        spatial_kernels = spatial_kernels / spatial_kernels.sum(
+-            dim=(-3, -2, -1), keepdim=True
+-        ).clamp_min(self.gaussian_epsilon)
+-        kernel_peaks = spatial_kernels.amax(
+-            dim=(-3, -2, -1)
+-        ).detach().cpu().numpy()
+-        reference_index = self.species.index(
+-            self.gaussian_relative_intensity_reference_species
+-        )
+-        if self.gaussian_normalize_relative_reference_peak_to_one:
+-            raw_reference_peak = float(
+-                np.sum(
+-                    raw_component_amplitudes[reference_index]
+-                    * kernel_peaks[reference_index]
+-                )
+-            )
+-            if not np.isfinite(raw_reference_peak) or raw_reference_peak <= 0.0:
+-                raise ValueError(
+-                    "The rendered relative-intensity reference peak must be positive."
+-                )
+-            self.gaussian_phase_table_to_image_amplitude_scale = (
+-                1.0 / raw_reference_peak
+-            )
+-            self.gaussian_intensity_scale_source = (
+-                "unit_relative_rendered_csv_peak"
+-            )
+-        else:
+-            configured_reference_amplitude = float(
+-                args.gaussian_reference_integrated_amplitude
+-            )
+-            if (
+-                not np.isfinite(configured_reference_amplitude)
+-                or configured_reference_amplitude <= 0.0
+-            ):
+-                raise ValueError(
+-                    "imaging.reference_integrated_amplitude must be finite and positive."
+-                )
+-            reference_phase_table_weight = element_fits[
+-                self.gaussian_relative_intensity_reference_species
+-            ]["total_integrated_weight"]
+-            self.gaussian_phase_table_to_image_amplitude_scale = (
+-                configured_reference_amplitude / reference_phase_table_weight
+-            )
+-            self.gaussian_intensity_scale_source = (
+-                "configured_absolute_reference_amplitude"
+-            )
+-        self.gaussian_component_amplitudes = (
+-            raw_component_amplitudes
+-            * self.gaussian_phase_table_to_image_amplitude_scale
+-        )
+-        self.gaussian_amplitudes = self.gaussian_component_amplitudes.sum(axis=1)
+-        self.gaussian_reference_integrated_amplitude = float(
+-            self.gaussian_amplitudes[reference_index]
+-        )
+-        self.gaussian_rendered_single_atom_peak_amplitudes = (
+-            self.gaussian_component_amplitudes * kernel_peaks
+-        ).sum(axis=1)
+-        if np.any(~np.isfinite(self.gaussian_component_amplitudes)) or np.any(
+-            self.gaussian_component_amplitudes <= 0.0
+-        ):
+-            raise ValueError(
+-                "All double-Gaussian component integrated amplitudes must be finite and positive."
+-            )
+-        self.gaussian_component_amplitudes_t = torch.tensor(
+-            self.gaussian_component_amplitudes,
+-            device=self.device,
+-            dtype=self.dtype,
+-        )
++        initialize_calibrated_renderer(self)
+@@ -4377 +4286 @@
+-                "This workflow requires genetic.score=guided so Gaussian image, level-set, "
++                "This workflow requires genetic.score=guided so calibrated image, level-set, "
+@@ -4595,69 +4504,3 @@
+-        """Render soft occupancies as fixed, unit-integral double Gaussians.
+-
+-        Each species uses the sum of its fitted core and tail lateral Gaussian.
+-        Both use the same configured vertical sigma.  Every 3D component has a
+-        discrete voxel sum of one, so fractional occupancies scale the fitted
+-        integrated component amplitudes linearly.  The phase-table component
+-        weights are globally scaled by the configured reference-species image
+-        amplitude without changing their fitted relative intensities.
+-        """
+-        shape = self.target_shape_zyx
+-        n_voxels = int(np.prod(shape))
+-        pixels_zyx = positions[:, [2, 1, 0]] / torch.as_tensor(
+-            self.target_voxel_size_A,
+-            device=positions.device,
+-            dtype=positions.dtype,
+-        )
+-        base = torch.floor(pixels_zyx).long()
+-        fraction = pixels_zyx - base.to(positions.dtype)
+-        species_offsets = (
+-            torch.arange(self.n_species, device=occ.device, dtype=torch.long)
+-            * n_voxels
+-        )
+-        flat_density = torch.zeros(
+-            self.n_species * n_voxels,
+-            device=occ.device,
+-            dtype=occ.dtype,
+-        )
+-        for dz in (0, 1):
+-            wz = fraction[:, 0] if dz else 1.0 - fraction[:, 0]
+-            iz = torch.remainder(base[:, 0] + dz, shape[0])
+-            for dy in (0, 1):
+-                wy = fraction[:, 1] if dy else 1.0 - fraction[:, 1]
+-                iy = torch.remainder(base[:, 1] + dy, shape[1])
+-                for dx in (0, 1):
+-                    wx = fraction[:, 2] if dx else 1.0 - fraction[:, 2]
+-                    ix = torch.remainder(base[:, 2] + dx, shape[2])
+-                    voxel_index = iz * (shape[1] * shape[2]) + iy * shape[2] + ix
+-                    flat_indices = (
+-                        voxel_index[:, None] + species_offsets[None, :]
+-                    ).reshape(-1)
+-                    source = ((wz * wy * wx)[:, None] * occ).reshape(-1)
+-                    flat_density.index_add_(0, flat_indices, source)
+-        densities = flat_density.view(self.n_species, *shape)
+-        blurred = torch.fft.ifftn(
+-            torch.fft.fftn(densities, dim=(-3, -2, -1))[:, None, :, :, :]
+-            * self.gaussian_fourier_kernels_t,
+-            dim=(-3, -2, -1),
+-        ).real
+-        # A very narrow Fourier-truncated Gaussian can ring slightly below
+-        # zero. Match the calibration script: clip and restore each species'
+-        # exact occupancy integral after clipping.
+-        blurred = torch.clamp(blurred, min=0.0)
+-        sum_dims = (-3, -2, -1)
+-        normalization = densities.sum(dim=sum_dims)[:, None] / (
+-            blurred.sum(dim=sum_dims) + self.gaussian_epsilon
+-        )
+-        unit_integral_basis = blurred * normalization[:, :, None, None, None]
+-        double_components = (
+-            self.gaussian_component_amplitudes_t[:, :, None, None, None]
+-            * unit_integral_basis
+-        )
+-        species_components = double_components.sum(dim=1)
+-        predicted_linear = species_components.sum(dim=0)
+-        predicted_image = torch_image_transform(
+-            predicted_linear,
+-            self.image_target_transform,
+-            self.gaussian_transform_epsilon,
+-        )
+-        return predicted_image, predicted_linear, species_components
++        """Compatibility entry point; all GA phases use the calibrated renderer."""
++        predicted_linear, species_components = self.calibrated_renderer.render(occ, positions)
++        return predicted_linear, predicted_linear, species_components
+@@ -4666,45 +4509,9 @@
+-        """Square loss on smooth, non-double-counted W/Se ellipse occupancies.
+-
+-        Each atom receives a sigmoid gate for every fixed experimental ellipse.
+-        Gates are normalized together with a positive background channel, so an
+-        atom can be divided between overlapping ellipses but can never contribute
+-        more than its real occupancy across all regions. Depth is intentionally
+-        absent from this assignment.
+-        """
+-        delta_xy = positions[:, None, :2] - self.ellipse_centers_xy_A_t[None, :, :]
+-        cos_angle = torch.cos(self.ellipse_angles_radians_t)[None, :]
+-        sin_angle = torch.sin(self.ellipse_angles_radians_t)[None, :]
+-        major_coordinate = cos_angle * delta_xy[:, :, 0] + sin_angle * delta_xy[:, :, 1]
+-        minor_coordinate = -sin_angle * delta_xy[:, :, 0] + cos_angle * delta_xy[:, :, 1]
+-        elliptical_distance_squared = (
+-            major_coordinate / self.ellipse_semi_major_A_t[None, :]
+-        ) ** 2 + (
+-            minor_coordinate / self.ellipse_semi_minor_A_t[None, :]
+-        ) ** 2
+-        raw_membership = torch.sigmoid(
+-            (1.0 - elliptical_distance_squared)
+-            / self.ellipse_membership_boundary_softness
+-        )
+-        denominator = raw_membership.sum(dim=1, keepdim=True) + float(
+-            self.ellipse_membership_background_score
+-        )
+-        membership = raw_membership / denominator
+-        region_species_occupancies = membership.transpose(0, 1) @ occ
+-        predicted_integrals = (
+-            region_species_occupancies * self.ellipse_species_intensities_t[None, :]
+-        ).sum(dim=1)
+-        target_integrals = self.ellipse_target_integrals_t
+-        residuals_Se_units = (
+-            predicted_integrals - target_integrals
+-        ) / self.ellipse_I_Se
+-        loss = torch.mean(residuals_Se_units**2)
+-        return {
+-            "objective_term": self.ellipse_composition_penalty * loss,
+-            "loss_raw": loss,
+-            "predicted_integrals": predicted_integrals,
+-            "target_integrals": target_integrals,
+-            "residuals_Se_units": residuals_Se_units,
+-            "membership": membership,
+-            "background_membership": 1.0 - membership.sum(dim=1),
+-            "region_species_occupancies": region_species_occupancies,
+-        }
++        """Retired term: exact zero for legacy metrics, never part of an objective."""
++        zero = occ.sum() * 0.0
++        empty = occ.new_empty(0)
++        return {"objective_term": zero, "loss_raw": zero,
++                "predicted_integrals": empty, "target_integrals": empty,
++                "residuals_Se_units": empty,
++                "membership": occ.new_zeros((len(occ), 0)),
++                "background_membership": occ.new_ones(len(occ)),
++                "region_species_occupancies": occ.new_zeros((0, self.n_species))}
+@@ -4800 +4606,0 @@
+-            + ellipse_composition_objective
+@@ -4871 +4677 @@
+-                    (image_objective + ellipse_composition_objective).detach().cpu()
++                    image_objective.detach().cpu()
+@@ -4881,15 +4687,3 @@
+-                "ellipse_mean_absolute_residual_Se_units": float(
+-                    torch.mean(
+-                        torch.abs(ellipse_composition_info["residuals_Se_units"])
+-                    ).detach().cpu()
+-                ),
+-                "ellipse_maximum_absolute_residual_Se_units": float(
+-                    torch.max(
+-                        torch.abs(ellipse_composition_info["residuals_Se_units"])
+-                    ).detach().cpu()
+-                ),
+-                "ellipse_mean_background_membership": float(
+-                    torch.mean(
+-                        ellipse_composition_info["background_membership"]
+-                    ).detach().cpu()
+-                ),
++                "ellipse_mean_absolute_residual_Se_units": 0.0,
++                "ellipse_maximum_absolute_residual_Se_units": 0.0,
++                "ellipse_mean_background_membership": 1.0,
+@@ -6302,0 +6097,4 @@
++        roi = tuple(slice(int(lo), int(hi)) for lo, hi in zip(
++            self.sample_roi_start_zyx, self.sample_roi_stop_zyx))
++        target = target[roi]
++        predicted = predicted[roi]
+@@ -6304,2 +6102,3 @@
+-        mask = np.asarray(self.experimental["feasible_mask"], dtype=bool)
+-        positions = self.z_to_positions(z.detach().cpu().numpy())
++        mask = np.asarray(self.experimental["feasible_mask"], dtype=bool)[roi]
++        # Plot and export these overlay coordinates in the TIFF crop frame.
++        positions = self.z_to_positions(z.detach().cpu().numpy()) - self.vacuum_position_shift
+@@ -6324,4 +6123 @@
+-        slice_assignment = np.mod(
+-            np.rint(positions[:, 2] / dz_A).astype(int),
+-            nz,
+-        )
++        slice_assignment = np.rint(positions[:, 2] / dz_A).astype(int)
+@@ -6349 +6145 @@
+-            f"ellipse occupancy MSE={float(auxiliary['image']['ellipse_composition_loss_raw']):.6g} | "
++            
+@@ -6363,0 +6160,5 @@
++
++        # Keep the diagnostic header inside the exported figure width.
++        import textwrap
++        headline = textwrap.fill(headline, width=130)
++        detail_line = textwrap.fill(detail_line, width=130)
+@@ -6466 +6267 @@
+-                f"Syntropized Gaussian {self.image_target_transform}-domain + atoms"
++                f"Calibrated {self.image_target_transform} model + atoms"
+@@ -6538 +6339 @@
+-            f"Syntropized Gaussian {self.image_target_transform}-domain model"
++            f"Calibrated {self.image_target_transform} model"
+@@ -6701,0 +6503 @@
++            position_coordinate_frame=np.asarray("TIFF_crop_without_added_padding"),
+@@ -6758 +6560 @@
+-                    np.diag(self.cell), device=z.device, dtype=z.dtype
++                    np.diag(self.cell).copy(), device=z.device, dtype=z.dtype
+@@ -6831,3 +6633,6 @@
+-            gaussian_shared_sigma_z_angstrom=np.asarray(
+-                self.gaussian_shared_sigma_z_A
+-            ),
++            depth_response_rms_angstrom=np.asarray(self.gaussian_shared_sigma_z_A),
++            depth_response_centered_lags_angstrom=self.calibrated_renderer.lags.cpu().numpy(),
++            depth_response_mass=self.calibrated_renderer.mass.cpu().numpy(),
++            depth_envelope=self.calibrated_renderer.envelope.cpu().numpy(),
++            calibrated_raw_gain=np.asarray(self.calibrated_renderer.calibration["fit"]["gain"]),
++            target_normalization=np.asarray(self.experimental["target_normalization"]),
+@@ -6862,0 +6668,2 @@
++        if self.ellipse_region_count == 0:
++            return
+@@ -6902 +6709,3 @@
+-        """Write the final local-composition comparison without FairChem/rendering."""
++        """Legacy compatibility; there are no ellipse regions in the new model."""
++        if self.ellipse_region_count == 0:
++            return
+@@ -6909 +6718 @@
+-                torch.as_tensor(np.diag(self.cell), device=z.device, dtype=z.dtype),
++                torch.as_tensor(np.diag(self.cell).copy(), device=z.device, dtype=z.dtype),
+@@ -7070 +6879 @@
+-            "image_forward_model": "species_resolved_phase_table_double_xy_gaussian_shared_z_gaussian",
++            "image_forward_model": "species_resolved_double_xy_gaussian_flexible_depth_fixed_envelope",
+@@ -7098,0 +6908 @@
++            "calibrated_image_model": self.image_model_metadata,
+@@ -7114 +6924 @@
+-            "gaussian_shared_sigma_z_angstrom": float(
++            "depth_response_rms_angstrom": float(
+@@ -7651 +7460,0 @@
+-            + ellipse_terms["objective_term"]
+@@ -7653,0 +7463 @@
++            + problem.sample_box_confinement_terms(occupancy, wrapped_positions)[0]
+@@ -8007 +7817 @@
+-        "shared_sigma_z_angstrom": float(problem.gaussian_shared_sigma_z_A),
++        "depth_response_rms_angstrom": float(problem.gaussian_shared_sigma_z_A),
+@@ -8282 +8091,0 @@
+-            + ellipse_terms["objective_term"]
+@@ -8438 +8246,0 @@
+-        f"ellipse_mse={soft_handoff_metrics['ellipse_composition_mse']:.9g} "
+@@ -9005,10 +8813 @@
+-# Exact script revision used by the in-progress 08.20 run before this fix.
+-# Compatibility remains strict: all resolved YAML/CLI parameters must match.
+-CHECKPOINT_COMPATIBLE_SCRIPT_SHA256 = (
+-    "c4c8b3c2b5102e0bc430efe040928c24b756a6c4480ba3a8e69afd64d5752d95",
+-    "8059c1fa63338b633c083298cfc0387edf92b53ab3a0ad69ce2233b0d0086223",
+-    # Revision immediately before local-worker death detection. The new
+-    # health-check interval is operational only and is excluded below, so
+-    # existing scientific checkpoints remain resumable.
+-    "a970fca8afd8f21d59f0748b189091e5a76675154866070b2bf5df71d2f3cf39",
+-)
++CHECKPOINT_COMPATIBLE_SCRIPT_SHA256 = ()
+@@ -9065,0 +8865,9 @@
++        "scientific_assets_sha256": {
++            str(asset): file_sha256(asset) for asset in (
++                Path(args.depth_calibration_file),
++                Path(args.gaussian_element_fit_csv),
++                SCRIPT_DIR / "calibrated_image_model.py",
++                SCRIPT_DIR / "minimizer.py",
++                resolve_script_relative_path(args.experimental_tiff),
++            )
++        },
+@@ -9134,7 +8941,0 @@
+-        if not compatible and prior_run_parameters_match_current_args(args):
+-            compatible = True
+-            print(
+-                "[ga checkpoint] accepted same-parameter checkpoint across the "
+-                "coordinator CUDA/cleanup reliability patch",
+-                flush=True,
+-            )
+@@ -10933,2 +10734 @@
+-            "source_halo_LoG_then_joint_normalized_double_Gaussian_unmixing_"
+-            "close_kernel_grouping_and_responsibility_deblended_adaptive_ellipses"
++            "removed"
+@@ -10937,2 +10737 @@
+-            "mean_square_of_IW_times_smooth_owned_W_occupancy_plus_ISe_times_"
+-            "smooth_owned_Se_occupancy_minus_joint_fit_target_all_divided_by_ISe"
++            "removed; compatibility metrics are zero"
+@@ -10940 +10739 @@
+-        "image_forward_model": "species_resolved_phase_table_double_xy_gaussian_shared_z_gaussian",
++        "image_forward_model": "species_resolved_double_xy_gaussian_flexible_depth_fixed_envelope",
+@@ -10974,0 +10774 @@
++        "calibrated_image_model": problem.image_model_metadata,
+@@ -10990 +10790 @@
+-        "gaussian_shared_sigma_z_angstrom": float(
++        "depth_response_rms_angstrom": float(
+@@ -12179,10 +11979,3 @@
+-        f"shared_sigma_z_A={problem.gaussian_shared_sigma_z_A:.6g}"
+-    )
+-    print(
+-        f"[experimental halo-LoG ellipse-composition term] "
+-        f"regions={problem.ellipse_region_count} "
+-        f"penalty={problem.ellipse_composition_penalty:.3e} "
+-        f"I_Se={problem.ellipse_I_Se:.8g} I_W={problem.ellipse_I_W:.8g} "
+-        f"membership_softness={problem.ellipse_membership_boundary_softness:.3f} "
+-        f"background_score={problem.ellipse_membership_background_score:.3f}"
+-    )
++        f"depth_response_rms_A={problem.gaussian_shared_sigma_z_A:.6g}"
++    )
++    print("[depth model] calibrated flexible response; fixed envelope; ellipse penalty removed")
+@@ -12213 +12006 @@
+-        f"+ image_penalty*masked_Huber({problem.image_target_transform}(linear Gaussian sum), "
++        f"+ image_penalty*masked_Huber({problem.image_target_transform}(calibrated enveloped field), "
+@@ -12216,2 +12008,0 @@
+-        "+ ellipse_composition_penalty*mean_square(Se-normalized joint-fit amplitude "
+-        f"residuals over {problem.ellipse_region_count} fixed experimental ellipses); "
+@@ -12238 +12029 @@
+-        f"depth_blur_A={problem.gaussian_shared_sigma_z_A:.6g}"
++        f"depth_response_rms_A={problem.gaussian_shared_sigma_z_A:.6g}"
+--- original/genetic_09.01.26_wse2.yaml
++++ genetic_09.01.26_wse2.yaml
+@@ -2 +2 @@
+-  output_dir: "/data2/jt577/2026/09.2026/blob_EAT/09.07/wse2_halo_log_ellipse_composition_ga"
++  output_dir: "/data2/jt577/2026/09.2026/blob_EAT/genetic_09.11.26_wse2/runs_30_slice_calibrated_150"
+@@ -11,4 +11,3 @@
+-  # FairChem requires all axes to remain periodic. The finite, incommensurate
+-  # experimental volume is centered between about 8 A of explicit vacuum on
+-  # either side of x, y, and z. Lateral padding is snapped to whole image voxels.
+-  vacuum_padding_angstrom: "8.0, 8.0, 8.0"
++  # FairChem remains xyz periodic. TIFF supplies z vacuum; optional extra z
++  # padding is the third value. XY padding is snapped to whole pixels.
++  vacuum_padding_angstrom: "8.0, 8.0, 0.0"
+@@ -19,4 +18,4 @@
+-  tiff_file: "/data2/jt577/2026/08.2026/blob_EAT/08.24/objp_zstack_iter0200.tif"
+-  crop_xy_size_source_pixels: 200
+-  target_xy_pixels: 200
+-  target_z_slices: 12
++  tiff_file: "/data2/jt577/2026/09.2026/blob_EAT/chia-hao_data/objp_zstack_iter0001_30_slices.tif"
++  crop_xy_size_source_pixels: 150
++  target_xy_pixels: 150
++  target_z_slices: 30
+@@ -24 +23 @@
+-  target_background_percentile: 1.0
++  # Background is the bundled fitted profile (zero for this TIFF).
+@@ -36,3 +35,5 @@
+-  # Occupancy-normalized smooth squared distance outside the original measured
+-  # volume. This confines atoms without changing FairChem's xyz-periodic PBC.
+-  confinement_penalty: 50
++  # Atomic slab in TIFF coordinates, independent of optional added z padding.
++  # Bounds translate into cell coordinates automatically when padding changes.
++  z_min_angstrom: 7.0
++  z_max_angstrom: 23.0
++  confinement_penalty: 50.0
+@@ -43,3 +44,2 @@
+-  # Render the complete xyz-vacuum-padded periodic cell, but evaluate the loss
+-  # and correlation only on the embedded experimental 12x150x150 ROI.
+-  # This coefficient weights the existing voxelwise 3D Huber term.
++  depth_calibration_file: "calibration/accepted_30_slice_model.json"
++  # All 30 measured slices contribute; synthetic XY/Z padding is masked out.
+@@ -48,3 +47,0 @@
+-  # Square loss between each experimental joint-fit amplitude and the W/Se
+-  # occupancy predicted for its adaptive ellipse. Residuals are in Se units.
+-  ellipse_composition_penalty: 5.0
+@@ -55 +52 @@
+-  normalize_relative_intensity_reference_peak_to_one: true
++  normalize_relative_intensity_reference_peak_to_one: false
+@@ -58,45 +54,0 @@
+-  shared_sigma_z_angstrom: 3.0
+-
+-experimental_peak_ellipses:
+-  # LoG runs on a real source-image halo, then candidate centers are mapped
+-  # back into the selected experimental crop.
+-  detection_halo_source_pixels: 16
+-  min_sigma_pixels: 0.6
+-  max_sigma_pixels: 2.5
+-  num_sigma: 16
+-  threshold_rel: 0.05
+-  minimum_separation_angstrom: 0.45
+-  # Overlap-aware normalized double-Gaussian unmixing and logical grouping.
+-  kernel_support_sigma: 4.5
+-  minimum_retained_amplitude_Se_units: 0.45
+-  pruning_rounds: 3
+-  position_refinement_rounds: 2
+-  position_step_pixels: 0.50
+-  minimum_fitted_separation_angstrom: 0.28
+-  merge_distance_angstrom: 0.55
+-  residual_addition_rounds: 1
+-  residual_peak_threshold_rel: 0.05
+-  residual_minimum_separation_angstrom: 0.35
+-  maximum_residual_peaks_per_round: 20
+-  # One shared experimental scale is fitted; the W/Se ratio remains fixed to
+-  # element_double_gaussian_fits.csv exactly.
+-  maximum_Se_count: 6
+-  maximum_W_count: 6
+-  maximum_total_atoms: 8
+-  initial_I_Se_for_scale_fit: 0.12117379665687308
+-  scale_fit_maximum_iterations: 100
+-  # Responsibility-deblended adaptive ellipse fitting.
+-  local_search_radius_angstrom: 1.40
+-  foreground_relative_threshold: 0.12
+-  minimum_covariance_sigma_angstrom: 0.12
+-  axis_scale_minimum: 0.65
+-  axis_scale_maximum: 1.80
+-  axis_scale_steps: 18
+-  angle_search_half_range_degrees: 20.0
+-  angle_search_steps: 9
+-  intensity_coverage_weight: 0.35
+-  # Smooth, conservative atom-to-region ownership. The background channel
+-  # prevents atoms outside all ellipses from being assigned to a remote region.
+-  membership_boundary_softness: 0.10
+-  membership_background_score: 0.02
+-  low_confidence_visible_fraction: 0.70
+@@ -140,2 +92 @@
+-  # Disabled for the clean comparison run. The previous global Se-removal
+-  # incentive competed too strongly with the local ellipse information.
++  # Keep the optional vacancy bias disabled for the calibrated image run.
+--- original/README_WSE2_METHOD.md
++++ README_WSE2_METHOD.md
+@@ -1 +1 @@
+-# Periodic WSe2 image-guided EAT genetic optimization
++# Calibrated 30-slice WSe2 genetic optimization
+@@ -3,5 +3 @@
+-This directory adapts the Garnet optimizer to the centered twisted-bilayer
+-WSe2 reconstruction. FairChem remains periodic in x, y, and z. Because the
+-finite twisted sample crop is not commensurate in any direction, the measured
+-volume is centered between about 8 A of explicit vacuum on both sides of x, y,
+-and z.
++The driver remains `genetic_09.01.26_wse2.py` and loads the adjacent YAML by default. The original source, YAML and README are preserved in `original_before_30_slice_update/`. Existing analysis results and the previous CPU prototype are unchanged.
+@@ -9 +5 @@
+-## Geometry and image loss
++## Default experiment and geometry
+@@ -11,7 +7 @@
+-The default centered 150x150 crop has sample-cell lengths
+-22.8846 x 22.8846 x 12 A. The padded FairChem/render cell has lengths
+-38.751256 x 38.751256 x 28 A and `pbc = [true, true, true]`. The requested
+-8-A lateral padding is snapped to 52 native pixels, or 7.933328 A per side,
+-because the FFT renderer requires whole pixels on a uniform grid. Z padding is
+-exactly 8 A. Initial sample coordinates and all experimental fields are shifted
+-by the realized padding in x, y, and z.
++The input is `../chia-hao_data/objp_zstack_iter0001_30_slices.tif`, using the centered **150×150 crop, all 30 slices**, without resampling. The source crop is y=214:364, x=231:381. Voxel spacing is (z,y,x) = (1, 0.152564, 0.152564) Å, retaining the calibration's assumed 1 Å depth spacing.
+@@ -19,3 +9 @@
+-The Gaussian renderer operates on the complete 28x254x254 periodic grid. A
+-binary mask is one only on the centered ZYX ROI `[8:20, 52:202, 52:202]`, which
+-contains the original 12x150x150 experiment. The image loss is
++Requested extra padding is (x,y,z) = (8,8,0) Å per side. Whole-pixel snapping makes XY padding 7.933328 Å, producing a 30×254×254 render grid and a 38.751256×38.751256×30 Å FairChem cell. FairChem remains periodic in all axes; the image renderer is periodic only in XY. The image objective and slice-comparison metrics use only the measured 30×150×150 ROI, including its measured vacuum slices.
+@@ -23,2 +11,37 @@
+-```text
+-sum(mask * Huber(simulated - experimental)) / sum(mask)
++The allowed atomic box is independent of that image ROI. It spans the measured XY crop and **7≤z≤23 Å in TIFF coordinates**. `sample_box.z_min_angstrom` and `z_max_angstrom` set these bounds. The existing occupancy-normalized smooth box penalty remains at weight 50, sharpness 8 Å⁻¹. Candidate seeding excludes depths outside these bounds. The separate intensity-level-set penalty remains optional and defaults to zero.
++
++Extra z padding remains available: change `system.vacuum_padding_angstrom` to e.g. `"8,8,8"`. The renderer translates its experimental origin and atomic bounds automatically; then the allowed z interval in cell coordinates is 15–31 Å. Measured-image predictions and box costs are unchanged for correspondingly shifted atoms. `sample_box.confinement_penalty: 0` explicitly disables the box penalty, but allows weakly visible vacuum atoms.
++
++## Blob model
++
++For atom i and species s, the raw prediction is
++
++`I(x,y,z) = g E(z) Σᵢ Σₛ oᵢₛ aₛ Lₛ(x−xᵢ,y−yᵢ) K(z−zᵢ)`.
++
++- `oᵢW`, `oᵢSe` and implicit null occupancy are the existing EAT variables. `aW=1`, `aSe=0.5824533131834269`.
++- Each unit-integral lateral profile `Ls` is the fitted core+tail double Gaussian in `element_double_gaussian_fits.csv`, with fixed extra isotropic XY Gaussian blur **σ=0.08 Å** added in quadrature. Effective W core/tail σ are 0.131169/0.230443 Å; Se are 0.132432/0.235900 Å. Core integral fractions are 0.234326 and 0.214940, respectively.
++- `K` is the accepted shared, nonnegative **31-bin flexible depth response**, with linear interpolation and zero outside its support. It is not a Gaussian. Its tabulated RMS width is 3.894058 Å; central FWHM is about 6.83235 Å. The full-domain mass is one. The centered lag table is stored in `calibration/accepted_30_slice_model.json`.
++- `E(z) = exp[-(max(9−z,0)/1.326847883729309)² − (max(z−20,0)/1.219451739561209)²]`. This fixed experimental-coordinate envelope is one from 9–20 Å and suppresses the **summed simulated intensity field** outside. The envelope plateau and atomic box bounds are separate parameters.
++- The calibrated raw gain is **g=12.298994422022743**. Both experiment and model are divided by one fixed target percentile scale (99.5th percentile, 0.09016454655677088 for this crop). No per-candidate, per-slice, unit-peak, clipped-field or observed-window renormalization is performed.
++- The fitted additive background is zero for every slice. The requested suppression is `E`, not an additional adjustable background subtraction. The renderer preserves the calibration's tiny Fourier ringing.
++
++Positions are physical cell coordinates. Subtract padding to obtain TIFF coordinates. The renderer uses the centered response directly and adds **no hidden registration offset**. To replay the old calibration XSF specifically, add its recorded XY registration and change `z_old` to `z_old−8+8.810930895711342` Å before adding any new z padding. Arbitrary old GA imports must be transformed into the new cell/frame before use; old checkpoints cannot resume this objective.
++
++## Optimization and outputs
++
++The blob shapes, envelope and gain remain fixed at the accepted calibration. **Atomic XYZ coordinates and W/Se/null occupancies remain optimizable**, including by autograd and PBFGS. Bilinear XY deposition and linear depth interpolation are differentiable within bins, with interpolation kinks at bin boundaries.
++
++The guided score contains formation energy, voxel Huber loss (weight 100, δ=0.20 in normalized intensity), the existing quadratic global 1:2 composition penalty (weight 10), box confinement, and optional level-set/vacancy-bias terms. The Se-vacancy bias stays disabled. The depth-sum ellipse penalty is removed from both prefits, the main objective and ranking. No ellipse detection runs. Some old serialized ellipse fields remain as zero/empty compatibility entries.
++
++The actual image prefit, main optimization and final image outputs all call the same calibrated renderer. Optional member slice comparisons (`diagnostics.member_slice_comparisons_enable`) show experiment, calibrated model and residual over the measured ROI. The new default output directory is `runs_30_slice_calibrated_150/`. Population/generation settings remain as configured previously (50/100); this update does not launch that run.
++
++Each constructed problem writes `image_model_calibration.json` with the depth table, envelope, normalization and provenance. Checkpoint identity includes the TIFF, calibration, lateral CSV, renderer and minimizer contents as well as parameters and driver code. Old-objective checkpoints and changed calibration assets are rejected.
++
++## CPU verification
++
++Run the actual-production integration tests with:
++
++```bash
++CUDA_VISIBLE_DEVICES='' OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
++  /data2/jt577/2026/05.2026/ws09_ghost_venv/bin/python \
++  cpu_integration_tests/run_tests.py
+@@ -27,3 +50 @@
+-and image correlation is computed from the same masked values. Vacuum on all
+-six faces therefore affects periodic physical separation and Gaussian tails,
+-but it cannot dilute the image objective by adding zero-loss voxels.
++These tests construct the real GA problem through its lightweight coordinator path, avoiding model/reference downloads. They exercise production rendering against the accepted saved TIFF, full position/occupancy gradients including box forces, padding invariance, absence of axial wrapping, vacuum hiding, actual image-prefit steps, diagnostics/serialization, and checkpoint rejection. See `cpu_integration_tests/results.json` and `run.log`. They do **not** evaluate FairChem energy or run a GA population.
+@@ -31,8 +52 @@
+-A second image term detects an overcomplete set of projected-column candidates
+-with a scale-normalized Laplacian of Gaussian. Detection runs on a configurable
+-halo of real source pixels around the requested crop and candidate centers are
+-then mapped back into the crop. A global nonnegative fit of the normalized
+-double-Gaussian kernels prunes unsupported candidates, refines positions, adds
+-positive-residual candidates, and merges close fitted kernels into composition
+-groups. Responsibility-deblended experimental intensity then defines an
+-adaptive ellipse for each group.
++Launch a full run separately in the FairChem environment with:
+@@ -40,11 +54,2 @@
+-The fitted full-kernel amplitude is `I_tot,r`; it is not a raw sum truncated by
+-the displayed ellipse. One shared experimental scale is fitted while the W/Se
+-intensity ratio is held exactly to `element_double_gaussian_fits.csv`. During
+-EAT, smooth ellipse memberships `q_ri` give
+-
+-```text
+-n_r = sum_i q_ri x_W,i
+-m_r = sum_i q_ri x_Se,i
+-L_ellipse = ellipse_composition_penalty * mean_r [
+-  (I_W n_r + I_Se m_r - I_tot,r) / I_Se
+-]^2
++```bash
++/data2/jt577/2026/05.2026/ws09_ghost_venv/bin/python genetic_09.01.26_wse2.py
+@@ -52,91 +56,0 @@
+-
+-Memberships for each atom are normalized together with a background channel,
+-so overlapping ellipses divide ownership and never double-count an atom. The
+-background channel lets atoms outside all experimental regions remain
+-unassigned. Membership uses x/y only and is smooth in position.
+-
+-The original voxelwise 3D Huber coefficient and the ellipse-composition square
+-coefficient are independently adjustable. Initialization diagnostics include
+-`experimental_log_joint_fit_adaptive_ellipses.png`, a CSV region key, JSON
+-metadata, and all fitted arrays in a compressed NPZ file.
+-
+-## Sample-box confinement
+-
+-A separate smooth confinement term prevents real W/Se occupancy from relaxing
+-into the vacuum. For every site it sums the squared softplus distances below
+-and above the original sample bounds in x, y, and z, weights that value by the
+-site's total W+Se occupancy, and divides by the total W+Se occupancy. The term
+-therefore has an atom-count-independent scale:
+-
+-```text
+-L_box = box_penalty * sum_i[(W_i + Se_i) * violation_i^2]
+-                       / sum_i(W_i + Se_i)
+-```
+-
+-The default coefficient is `0.01` per squared Angstrom with sharpness `8.0/A`.
+-For the first WSe2 result, the raw occupancy-normalized loss is about 15.05
+-squared Angstrom, so this coefficient would contribute about 0.15: the same
+-order as that structure's 0.088 guided score rather than scaling with its 1,069
+-atoms.
+-It is included in random-immigrant image prefit, continuous EAT/PBFGS,
+-fixed-identity position polishing, crossover-child relaxation, and guided GA
+-scoring. FairChem still receives `pbc = [true, true, true]`.
+-
+-## Effective atoms and initialization
+-
+-There is one permanent site class with three choices: W, Se, or implicit null.
+-The p50 feasible isosurface and cylinder initializer generate all proposal
+-positions. Candidate count is density times the unpadded feasible sample volume;
+-vacuum creates no proposal sites.
+-
+-Every random immigrant first optimizes W/Se/null logits and positions using the
+-masked double-Gaussian image loss, a soft W:Se = 1:2 fractional-composition
+-penalty, feasible-region loss, pair repulsion, and an increasing entropy term.
+-The complete soft state, including every candidate site, is then handed to the
+-normal energy-inclusive EAT syntropization. No pre-syntropization rounding or
+-null-site compaction is performed. No formula-unit search, volume prior, exact
+-atom count, or exact composition projection is used.
+-
+-## FairChem and genetic optimization
+-
+-Random immigrants undergo the same FairChem-energy syntropization as other
+-optimized members. The guided objective is formation energy per atom plus masked
+-3D image, ellipse-composition, soft global composition, Se-vacancy bias, and
+-feasible-region terms. Syntropization performs the single W/Se/null rounding,
+-removes exact-null sites, and then runs the final fixed-species position
+-relaxation.
+-
+-The conventional formation energy per current atom is retained unchanged. A
+-separate calibrated term reduces its opposition to Se vacancies:
+-
+-```text
+-N_Se,reference = reference_atom_count * target_Se_fraction
+-L_Se-vacancy = -alpha * (N_Se,reference - sum_i x_Se,i)
+-                       / reference_atom_count
+-```
+-
+-The configured reference count is fixed at 350 for the 150x150 crop, giving
+-`N_Se,reference = 233.333...` for the soft 1:2 W:Se target. The initial
+-`alpha = 1.8353 eV/vacancy` is the calibrated 75% neutralization value. The term
+-uses summed soft Se occupancy during syntropization and exact Se counts after
+-rounding. It is constant during the final fixed-species position relaxation,
+-but remains included in final guided scoring and diagnostics.
+-
+-Later generations retain the Garnet workflow's elites, random immigrants,
+-superposition crossover, W/Se/null occupancy and species shocks, close-pair
+-pruning, PBFGS syntropization, fixed-identity final position polish, tournament
+-selection, checkpoints, local workers, and Slurm support. Parent A and parent B
+-are the lowest-score members of two independently sampled tournaments, with the
+-winning parent A excluded when tournament B is sampled. Subcell diversity does
+-not select or align crossover parents. All minimum-image distances remain
+-periodic in x, y, and z; disabling parent alignment does not disable z PBC.
+-
+-## Preflight
+-
+-Set `diagnostics.exit_after_initial_diagnostics: true` to stop after writing the
+-padded target, loss mask, feasible mask, NPZ fields, and
+-`geometry_and_mask_summary.json`. That JSON explicitly records the sample and
+-padded cells, requested and realized padding, all-periodic PBC, loss-mask voxel
+-count, and complete centered ZYX ROI. The same directory also contains the
+-halo-detection plot, joint reconstruction and adaptive-ellipse plot, smooth
+-membership-field plot, region CSV/JSON, and compressed fitted arrays.
+--- /dev/null
++++ calibrated_image_model.py
+@@ -0,0 +1,143 @@
++"""Calibrated W/Se image formation, independent of FairChem and GA machinery."""
++from pathlib import Path
++import hashlib
++import json
++import os
++import tempfile
++
++import numpy as np
++import torch
++
++
++def load_calibration(path, coefficient_path=None):
++    data = json.loads(Path(path).read_text())
++    fit = data['fit']
++    mass = np.asarray(fit['mass'], float)
++    lags = np.asarray(fit['centered_lags'], float)
++    if (data['schema_version'] != 1 or mass.shape != (31,) or lags.shape != (31,)
++            or not np.isfinite(mass).all() or not np.isfinite(lags).all()
++            or np.any(mass < 0) or not np.isclose(mass.sum(), 1., atol=1e-10)
++            or not np.allclose(np.diff(lags), 1.)
++            or not np.isfinite(fit['gain']) or fit['gain'] <= 0
++            or not np.isfinite(fit['widths']).all() or np.any(np.asarray(fit['widths']) <= 0)):
++        raise ValueError('Invalid calibrated depth response.')
++    if coefficient_path is not None:
++        digest = hashlib.sha256(Path(coefficient_path).read_bytes()).hexdigest()
++        if digest != data['element_fit_sha256']:
++            raise ValueError('Lateral coefficient CSV differs from the accepted calibration.')
++    return data
++
++
++def atomic_box_bounds(args, sample_lengths_xyz, padding_xyz):
++    """Bounds specified in experimental coordinates, then shifted into the cell."""
++    lower = np.array(padding_xyz, dtype=float, copy=True)
++    upper = lower + np.asarray(sample_lengths_xyz, dtype=float)
++    zmin = float(args.sample_box_z_min_angstrom)
++    zmax = float(args.sample_box_z_max_angstrom)
++    if not (np.isfinite([zmin, zmax]).all() and 0 <= zmin < zmax <= sample_lengths_xyz[2]):
++        raise ValueError('sample_box z_min/z_max must satisfy 0 <= min < max <= measured depth.')
++    lower[2] += zmin
++    upper[2] = padding_xyz[2] + zmax
++    if 2 * float(args.sample_box_confinement_margin_angstrom) >= np.min(upper - lower):
++        raise ValueError('Confinement margin leaves an empty atomic box.')
++    return lower, upper
++
++
++class CalibratedImageModel:
++    """XY FFT convolution and nonperiodic, piecewise linear axial response.
++
++    Occupancies and physical positions remain differentiable. Calibration is
++    fixed across candidates. The envelope attenuates the summed field in TIFF
++    coordinates. Neither lost tails nor attenuation are normalized away.
++    """
++    def __init__(self, calibration, element_fits, species, shape_zyx, voxel_zyx,
++                 padding_xyz, normalization, device, dtype):
++        self.calibration = calibration
++        self.shape = tuple(shape_zyx)
++        self.device, self.dtype = device, dtype
++        self.voxel = torch.as_tensor(voxel_zyx, device=device, dtype=dtype)
++        self.padding_z = float(padding_xyz[2])
++        self.normalization = float(normalization)
++        if not np.isfinite(normalization) or normalization <= 0:
++            raise ValueError('Target normalization must be positive and finite.')
++        if not np.allclose(voxel_zyx, calibration['voxel_size_zyx_A'], rtol=0, atol=1e-8):
++            raise ValueError('Accepted calibration requires native TIFF voxel spacing.')
++        f = calibration['fit']
++        self.mass = torch.tensor(f['mass'], device=device, dtype=dtype)
++        self.lags = torch.tensor(f['centered_lags'], device=device, dtype=dtype)
++        self.zgrid = torch.arange(self.shape[0], device=device, dtype=dtype) * self.voxel[0] - self.padding_z
++        lo, hi = calibration['envelope_plateau_A']
++        self.envelope = torch.exp(-((lo-self.zgrid).clamp_min(0)/f['widths'][0])**2
++                                  -((self.zgrid-hi).clamp_min(0)/f['widths'][1])**2)
++        fy = torch.fft.fftfreq(self.shape[1], device=device, dtype=dtype) / self.voxel[1]
++        fx = torch.fft.rfftfreq(self.shape[2], device=device, dtype=dtype) / self.voxel[2]
++        freq2 = fy[:, None]**2 + fx[None, :]**2
++        reference = element_fits['W']['total_integrated_weight']
++        kernels = []
++        for symbol in species:
++            row = element_fits[symbol]
++            kernel = torch.zeros_like(freq2)
++            for part in ('core', 'tail'):
++                sigma2 = row[part+'_sigma_xy_A']**2 + calibration['additional_lateral_blur_A']**2
++                kernel = kernel + row[part+'_integrated_weight']/reference * torch.exp(-2*np.pi**2*sigma2*freq2)
++            kernels.append(kernel)
++        self.fourier = torch.stack(kernels)
++        self.gain = f['gain'] / normalization
++
++    def axial(self, positions_z):
++        z = positions_z - self.padding_z
++        triangles = (1 - torch.abs(self.zgrid[None, :, None] - z[:, None, None] - self.lags)).clamp_min(0)
++        return triangles @ self.mass
++
++    def render(self, occ, positions):
++        nz, ny, nx = self.shape
++        ns = occ.shape[1]
++        response = self.axial(positions[:, 2])
++        pixels = positions[:, :2] / self.voxel[[2, 1]]
++        base = torch.floor(pixels).long()
++        fraction = pixels - base.to(positions.dtype)
++        offsets = torch.arange(ns*nz, device=occ.device).reshape(ns, nz, 1)*ny*nx
++        density = torch.zeros(ns*nz*ny*nx, device=occ.device, dtype=occ.dtype)
++        for dy in (0, 1):
++            for dx in (0, 1):
++                weight = (fraction[:, 0] if dx else 1-fraction[:, 0]) * (fraction[:, 1] if dy else 1-fraction[:, 1])
++                indices = (base[:, 1]+dy).remainder(ny)*nx + (base[:, 0]+dx).remainder(nx)
++                values = occ.T[:, None, :] * response.T[None, :, :] * weight[None, None, :]
++                density.index_add_(0, (offsets+indices).reshape(-1), values.reshape(-1))
++        density = density.reshape(ns, nz, ny, nx)
++        components = torch.fft.irfft2(torch.fft.rfft2(density) * self.fourier[:, None], s=(ny, nx))
++        components = components * (self.gain*self.envelope)[None, :, None, None]
++        # Retain the calibration's tiny Fourier ringing; no clipping/rescaling.
++        return components.sum(dim=0), components
++
++
++def initialize_calibrated_renderer(problem):
++    """Install the renderer and descriptive fields used by existing serializers."""
++    p = problem
++    cal = load_calibration(p.args.depth_calibration_file, p.gaussian_element_fit_csv)
++    p.calibrated_renderer = CalibratedImageModel(
++        cal, p.calibrated_element_fits, p.species, p.target_shape_zyx,
++        p.target_voxel_size_A, p.vacuum_position_shift,
++        p.experimental['target_normalization'], p.device, p.dtype)
++    p.image_model_metadata = dict(cal, target_normalization=p.experimental['target_normalization'],
++                                 calibration_file=str(p.args.depth_calibration_file),
++                                 normalized_gain=p.calibrated_renderer.gain)
++    p.gaussian_shared_sigma_z_A = cal['fit']['std']  # Legacy attribute: response RMS, not Gaussian sigma.
++    p.gaussian_phase_table_to_image_amplitude_scale = p.calibrated_renderer.gain / p.calibrated_element_fits['W']['total_integrated_weight']
++    p.gaussian_intensity_scale_source = 'fixed_calibrated_gain_divided_by_target_normalization'
++    p.gaussian_component_amplitudes = np.array([
++        [p.calibrated_element_fits[s][part+'_integrated_weight'] for part in ('core','tail')]
++        for s in p.species]) * p.gaussian_phase_table_to_image_amplitude_scale
++    p.gaussian_amplitudes = p.gaussian_component_amplitudes.sum(axis=1)
++    p.gaussian_reference_integrated_amplitude = float(p.gaussian_amplitudes[p.species.index('W')])
++    # Informational nominal peak at a grid-aligned XY atom and response knot,
++    # before envelope attenuation; actual peaks depend on subvoxel position/depth.
++    p.gaussian_rendered_single_atom_peak_amplitudes = (
++        torch.fft.irfft2(p.calibrated_renderer.fourier, s=p.target_shape_zyx[1:]).amax(dim=(-2,-1))
++        * p.calibrated_renderer.mass.max() * p.calibrated_renderer.gain).cpu().numpy()
++    p.gaussian_component_amplitudes_t = torch.as_tensor(p.gaussian_component_amplitudes, device=p.device, dtype=p.dtype)
++    # Multiple local workers may construct the same problem simultaneously.
++    with tempfile.NamedTemporaryFile(mode='w', dir=p.output_dir, delete=False) as handle:
++        handle.write(json.dumps(p.image_model_metadata, indent=2)+'\n')
++        temporary = handle.name
++    os.replace(temporary, p.output_dir/'image_model_calibration.json')
+--- /dev/null
++++ calibration/accepted_30_slice_model.json
+@@ -0,0 +1,208 @@
++{
++  "schema_version": 1,
++  "model": "double_xy_gaussian_flexible_depth_fixed_envelope",
++  "fit": {
++    "gain": 12.298994422022743,
++    "q": [
++      0.002068567276575219,
++      0.0013150916159457016,
++      0.0005683321704949267,
++      1.801828855448946e-16,
++      5.270583221904441e-20,
++      0.0020081568934878376,
++      0.0058582541336933,
++      0.010532499279635503,
++      0.017558652266228533,
++      0.02636316256781612,
++      0.038578821187550294,
++      0.0573859678192517,
++      0.0861029283592616,
++      0.11964139681635477,
++      0.14154103478534819,
++      0.14480573232578292,
++      0.13649323802668084,
++      0.1122944218170182,
++      0.08053372049904602,
++      0.05764771501641187,
++      0.04279737815974859,
++      0.03203769884910217,
++      0.023121699101310927,
++      0.015449091352501804,
++      0.009398907150663764,
++      0.0057281771519936756,
++      0.0032443803912426852,
++      0.0028694086734088074,
++      0.0031657414941832517,
++      0.0035417378978271517,
++      0.003919209436097833
++    ],
++    "mass": [
++      0.0017433150338189314,
++      0.0011083125073519974,
++      0.0004789701685057678,
++      1.518517365929473e-16,
++      4.441860350296284e-20,
++      0.001692403308477634,
++      0.004937128523133176,
++      0.008876416322448752,
++      0.01479780851991157,
++      0.022217937102620083,
++      0.03251286033810714,
++      0.048362855567928666,
++      0.07256449000443081,
++      0.10082952007360704,
++      0.11928575717010925,
++      0.12203712830875281,
++      0.11503165333858358,
++      0.09463775047806323,
++      0.06787095941486705,
++      0.04858344680952694,
++      0.03606811032873394,
++      0.02700023474463599,
++      0.019486146816306983,
++      0.013019945504624294,
++      0.007921065136613932,
++      0.004827504262748383,
++      0.002734248566884864,
++      0.0024182357205253372,
++      0.00266797449736868,
++      0.002984850912536329,
++      0.003302970518776802
++    ],
++    "lags": [
++      -15.0,
++      -14.0,
++      -13.0,
++      -12.0,
++      -11.0,
++      -10.0,
++      -9.0,
++      -8.0,
++      -7.0,
++      -6.0,
++      -5.0,
++      -4.0,
++      -3.0,
++      -2.0,
++      -1.0,
++      0.0,
++      1.0,
++      2.0,
++      3.0,
++      4.0,
++      5.0,
++      6.0,
++      7.0,
++      8.0,
++      9.0,
++      10.0,
++      11.0,
++      12.0,
++      13.0,
++      14.0,
++      15.0
++    ],
++    "centered_lags": [
++      -15.278026195680727,
++      -14.278026195680727,
++      -13.278026195680727,
++      -12.278026195680727,
++      -11.278026195680727,
++      -10.278026195680727,
++      -9.278026195680727,
++      -8.278026195680727,
++      -7.278026195680727,
++      -6.278026195680727,
++      -5.278026195680727,
++      -4.278026195680727,
++      -3.278026195680727,
++      -2.278026195680727,
++      -1.2780261956807268,
++      -0.2780261956807269,
++      0.7219738043192732,
++      1.7219738043192732,
++      2.721973804319273,
++      3.721973804319273,
++      4.721973804319273,
++      5.721973804319273,
++      6.721973804319273,
++      7.721973804319273,
++      8.721973804319273,
++      9.721973804319273,
++      10.721973804319273,
++      11.721973804319273,
++      12.721973804319273,
++      13.721973804319273,
++      14.721973804319273
++    ],
++    "offset": 8.810930895711342,
++    "reference_offset": 8.532904700030615,
++    "std": 3.8940582460588677,
++    "endpoint_mass": 0.005046285552595733,
++    "widths": [
++      1.326847883729309,
++      1.219451739561209
++    ],
++    "smoothing": 0.001,
++    "cost": 0.18064302297415236,
++    "success": true,
++    "nfev": 11,
++    "optimality": 7.35018666390348e-07,
++    "multistart_costs": [
++      0.18064302297415236,
++      0.18064302297417964,
++      0.18064302297420493
++    ]
++  },
++  "envelope_plateau_A": [
++    9.0,
++    20.0
++  ],
++  "additional_lateral_blur_A": 0.08,
++  "voxel_size_zyx_A": [
++    1.0,
++    0.152564,
++    0.152564
++  ],
++  "background_per_slice": [
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0,
++    0.0
++  ],
++  "position_convention": "Atomic positions are in TIFF coordinates plus the configured padding. centered_lags are used directly; no registration offset is applied by the renderer.",
++  "old_reference_z_to_tiff_A": 0.8109308957113424,
++  "xy_reference_registration_A": [
++    0.01020204687339659,
++    -0.006983990497643133
++  ],
++  "source_summary": "/data2/jt577/2026/09.2026/blob_EAT/chia-hao_data/depth_calibration_2026-09-10/30_slices/flexible_depth_with_envelope/summary.json",
++  "source_sha256": "6752589db66515844c6be97c992e21dfa667ae3d222d4c1a971d7f7b4dd2959f",
++  "element_fit_sha256": "71c069aea5e3554f510edb7c143c77272d45bdddc154baaf4f7355ad0f3c27de"
++}

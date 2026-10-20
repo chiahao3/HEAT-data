@@ -1,0 +1,66 @@
+14:19:16 CPU renderer replay, zero added z vacuum, optional padding invariance
+14:19:16 Autograd versus central differences for positions and soft W/Se occupancies
+14:19:16 Synthetic missing-Se identification and soft-occupancy recovery
+14:19:17 Testing whether cutoff-suppressed vacuum atoms are excluded by image loss
+14:19:17 CPU tests complete
+{
+  "device": "cpu",
+  "cuda_visible_devices": "",
+  "torch_version": "2.12.0+cu130",
+  "geometry": {
+    "sample_shape_zyx": [
+      30,
+      150,
+      150
+    ],
+    "render_shape_zyx": [
+      30,
+      254,
+      254
+    ],
+    "extra_padding_xyz_A": [
+      7.933328,
+      7.933328,
+      0.0
+    ],
+    "cell_xyz_A": [
+      38.751256,
+      38.751256,
+      30.0
+    ],
+    "atom_z_min_A": 9.005264925862342,
+    "atom_z_max_A": 20.61716144075534,
+    "periodic_z_gap_between_outermost_atom_centers_A": 18.388103485107003,
+    "note": "Geometric separation only; no FairChem energy convergence test."
+  },
+  "renderer_max_error_vs_saved_float32": 7.4192038623799306e-09,
+  "added_z_padding_roi_max_error": 0.0,
+  "no_axial_wrap_test": true,
+  "direct_vs_fft_renderer_error": 4.163336342344337e-17,
+  "gradient_checks_passed": 10,
+  "max_gradient_absolute_error": 2.347555960388603e-12,
+  "synthetic_vacancies_correct": 6,
+  "synthetic_vacancies_tested": 6,
+  "synthetic_soft_occupancy_max_error": 1.5258789063388178e-06,
+  "reference_counts": {
+    "W": 110,
+    "Se": 238
+  },
+  "nominal_stoichiometric_deletion_cost": 1.8455615628583297e-05,
+  "nominal_stoichiometric_vacuum_hiding_cases": 24,
+  "composition_penalty_weight": 10.0,
+  "image_penalty_weight": 100.0,
+  "huber_delta_normalized": 0.2,
+  "normalization_percentile_99p5": 0.09016454655677088,
+  "composition_cost_for_one_Se_deletion": -0.0006116302938028381,
+  "synthetic_deletions_beating_intact_with_composition": 6,
+  "vacuum_edge_visible_mass_range": [
+    0.013913249270564596,
+    0.04029820787774317
+  ],
+  "vacuum_hiding_beats_true_deletion_cases": 0,
+  "vacuum_edge_cases": 24,
+  "elapsed_seconds": 1.4705264568328857,
+  "energy_evaluated": false,
+  "energy_scope_note": "This CPU environment lacks FairChem and ASE; image/gradient/geometry/composition tests only. No full GA or energy validation."
+}

@@ -1,0 +1,69 @@
+{
+  "display_generation": 128,
+  "renderer": "scripts/eat_genetic_scripts/genetic_09.30.26_wse2/gaussian_image_model.py",
+  "methods": {
+    "heat": {
+      "source_xsf": "xsfs/wse2/xsfs_wse2_EAT/generation_0128_best_loss.xsf",
+      "source_xsf_sha256": "d3290771282dde664da62901c292c43e6645bb7f135272d67a50e6fa8c98f4db",
+      "first_found_generation": 115,
+      "member_index": 31,
+      "score": -0.35132288932800293,
+      "atom_count": 1497,
+      "cropped_atom_count": 1150,
+      "cropped_species": {
+        "Se": 761,
+        "W": 389
+      },
+      "saved_weighted_image_penalty": 0.03510674834251404,
+      "rerendered_weighted_image_penalty": 0.03510674089193344,
+      "cropped_zsum_correlation": 0.9344049954737008,
+      "display_scale": [
+        -0.000406916078645736,
+        1.9617524147033691
+      ],
+      "axis_label_size": 24,
+      "tick_label_size": 18.666666666666668,
+      "existing_projection_max_abs_error": 4.76837158203125e-07,
+      "depth_render": "Reused existing Blender render after verifying identical cropped coordinates and species."
+    },
+    "ordinary": {
+      "source_xsf": "xsfs/wse2/xsfs_wse2_ordinary/generation_0128_best_loss.xsf",
+      "source_xsf_sha256": "4ca2e47683762e308ac766d96549d8b53c0236312f481f72a9ecec57d580514e",
+      "first_found_generation": 128,
+      "member_index": 33,
+      "score": 0.03174460536908204,
+      "atom_count": 1298,
+      "cropped_atom_count": 981,
+      "cropped_species": {
+        "Se": 661,
+        "W": 320
+      },
+      "saved_weighted_image_penalty": 0.10565550625324249,
+      "rerendered_weighted_image_penalty": 0.10565604269504547,
+      "cropped_zsum_correlation": 0.12405758623945122,
+      "display_scale": [
+        -0.000406916078645736,
+        1.9617524147033691
+      ],
+      "axis_label_size": 24,
+      "tick_label_size": 18.666666666666668
+    }
+  },
+  "files_sha256": {
+    "heat_generation_0128_cropped_280x280.xsf": "de1d2c6769d7512074bd5985dc9a56d0863c48e9d2f9c4f3ebaad01b6a604977",
+    "heat_generation_0128_depth.png": "4d9d5357338411dbfe904dd692459745e578276ce16ef5ab11570924b555be59",
+    "heat_generation_0128_depth_axes.pdf": "b4a60129a3cb66700f88f2fefb7a685f87456f0fd7c8320149184bdcab2909c1",
+    "heat_generation_0128_depth_axes.png": "47e2348534e726131cc6e6c11e381de427f274c96cdc6d5f5042ebd017a73029",
+    "heat_generation_0128_reconstructed_zsum_280x280.png": "b8675a4898cb8970c263eebd82302c5cab0365657c3153b5e6c591185be5cd46",
+    "heat_generation_0128_reconstructed_zsum_280x280.tif": "3fd8c779200a3d1a8d5f626f28acee464af6efbdcf314076fa08d419a71eb6d8",
+    "heat_generation_0128_reconstructed_zsum_280x280_axes.pdf": "a25b97def2ac409bf2d632e716a1950fafd73f9caeaf93cbd6a8ff8985b4c36a",
+    "heat_generation_0128_reconstructed_zsum_280x280_axes.png": "6603f46b6113cf39ac4a10a7ee7bb61d977f62b1c8e69b5e4ea86085c99aaa33",
+    "heat_generation_0128_reconstructed_zsum_280x280_axes.svg": "d3b79390ab360da4c8a33dafcfa8a1041102d6f3dfb8a6d72292308d8215b60e",
+    "ordinary_generation_0128_cropped_280x280.xsf": "73b34316cee8ffa483d637549b786899417dfffed1c133594325961e60c8f8aa",
+    "ordinary_generation_0128_reconstructed_zsum_280x280.png": "a90d4a3d97d91ae5905e6894916009bcc57912b96a757c64e8a4f4335e28b176",
+    "ordinary_generation_0128_reconstructed_zsum_280x280.tif": "76a448751192901c92755263625b0fe2e87792c98daf1c2771baa9b76b479b10",
+    "ordinary_generation_0128_reconstructed_zsum_280x280_axes.pdf": "7ab07090f03f15832cb8757b3d67d1e84432837b1860f1cac62908b9a3e8b059",
+    "ordinary_generation_0128_reconstructed_zsum_280x280_axes.png": "28391890b7cdbb28f37ebe85204dd22c20a1f3e51ac5282abe5b0d1fd2086058",
+    "ordinary_generation_0128_reconstructed_zsum_280x280_axes.svg": "3a3f3abc71e9a659c79d6451b5ebf4689a76562019470b89f569600d83881a84"
+  }
+}

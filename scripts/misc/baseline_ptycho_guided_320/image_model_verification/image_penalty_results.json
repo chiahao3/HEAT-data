@@ -1,0 +1,48 @@
+{
+  "atom_count": 1517,
+  "raw_huber_image_loss": 0.0026938621886074543,
+  "weighted_image_penalty": 0.026938621886074543,
+  "weighted_composition_penalty": 3.86256958117315e-06,
+  "weighted_sample_box_penalty": 0.003151326018269174,
+  "volume_pearson_correlation": 0.8626744671587647,
+  "cropped_projection_pearson_correlation": 0.9572487955099933,
+  "formation_energy_per_atom_eV": -0.38675581505212986,
+  "total_loss": -0.35666200457820496,
+  "source_xsf": "scripts/misc/baseline_ptycho_guided_320/final_guided_relaxed.xsf",
+  "source_sha256": "6cdc86c455cc694025611689ebcdac2025dd3f7b50d76790818eec037e44979a",
+  "renderer_sha256": "074057eba3e59b86a550cabaa08b5dc8e6854292c8c3f94baec0566bcbdcf7e4",
+  "experimental_tiff_sha256": "3e70a534efb1770007528792f08dc212cfdac96da38418a7e757fa52d6401785",
+  "normalization": {
+    "schema_version": 3,
+    "model": "double_xy_gaussian_gaussian_depth_no_envelope",
+    "sigma_z_A": 4.0,
+    "intensity_normalization": "unit_isolated_grid_aligned_W_peak",
+    "reference_peak_before_scaling": 0.010289642959833145,
+    "additional_lateral_blur_A": 0.08,
+    "target_normalization": 0.12362680584192276,
+    "kernel_peak_scale": 97.18510194217816,
+    "depth_envelope": false,
+    "target_background": 0.0,
+    "target_background_percentile": 1.0,
+    "target_normalization_percentile": 99.5,
+    "depth_response": "dz_pixel/(sqrt(2*pi)*sigma_z)*exp(-0.5*((z-z_atom)/sigma_z)**2)",
+    "depth_window_renormalization": false,
+    "voxel_size_zyx_A": [
+      1.0,
+      0.152564,
+      0.152564
+    ],
+    "element_fit_sha256": "71c069aea5e3554f510edb7c143c77272d45bdddc154baaf4f7355ad0f3c27de",
+    "position_convention": "Cell coordinates including padding; no registration offset."
+  },
+  "huber_delta": 0.2,
+  "image_weight": 10,
+  "comparison_shape_zyx": [
+    12,
+    320,
+    320
+  ],
+  "registration": "none; saved coordinates used directly",
+  "validation_heat_image_term": 0.0351067422889173,
+  "validation_heat_logged_image_term": 0.03510674834251404
+}

@@ -1,0 +1,12 @@
+{
+  "numpy": "2.4.1",
+  "torch": "2.13.0",
+  "ase": "3.27.0",
+  "fairchem-core": "not recorded",
+  "scipy": "1.17.0",
+  "PyYAML": "6.0.3",
+  "tifffile": "2026.7.14",
+  "matplotlib": "3.10.8",
+  "fairchem_git_revision": "cce3699dc64d01c0a3bb5c6d5609caab96b985fa",
+  "fairchem_local_changes_patch": "source/fairchem_local_changes.patch"
+}

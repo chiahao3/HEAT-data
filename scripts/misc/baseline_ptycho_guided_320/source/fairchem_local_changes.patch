@@ -1,0 +1,1039 @@
+diff --git a/src/fairchem/core/README.md b/src/fairchem/core/README.md
+deleted file mode 120000
+index 8a33348c..00000000
+--- a/src/fairchem/core/README.md
++++ /dev/null
+@@ -1 +0,0 @@
+-../../../README.md
+\ No newline at end of file
+diff --git a/src/fairchem/core/README.md b/src/fairchem/core/README.md
+new file mode 100644
+index 00000000..c0d312b6
+--- /dev/null
++++ b/src/fairchem/core/README.md
+@@ -0,0 +1,226 @@
++[//]: # (<h1 align="center">)
++
++[//]: # ()
++[//]: # (<p align="center">)
++
++[//]: # (  <img width="559" height="200" src="https://github.com/user-attachments/assets/25cd752c-3c56-469d-8524-4e493646f6b2"?)
++
++[//]: # (</p>)
++
++[//]: # ()
++[//]: # (</h1>)
++
++<h4 align="center">
++
++![tests](https://github.com/facebookresearch/fairchem/actions/workflows/test.yml/badge.svg?branch=main&event=push)
++![PyPI - Version](https://img.shields.io/pypi/v/fairchem-core)
++![Static Badge](https://img.shields.io/badge/python-3.10%2B-blue)
++[![codecov](https://codecov.io/gh/facebookresearch/fairchem/graph/badge.svg)](https://codecov.io/gh/facebookresearch/fairchem)
++[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15587498.svg)](https://doi.org/10.5281/zenodo.15587498)
++
++[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new/facebookresearch/fairchem?quickstart=1)
++
++</h4>
++
++# `fairchem` by the FAIR Chemistry team
++
++`fairchem` is the [FAIR](https://ai.meta.com/research/) Chemistry's centralized repository of all its data, models,
++demos, and application efforts for materials science and quantum chemistry.
++
++> :warning: **FAIRChem version 2 is a breaking change from version 1 and is not compatible with our previous pretrained models and code.**
++> If you want to use an older model or code from version 1 you will need to install [version 1](https://pypi.org/project/fairchem-core/1.10.0/),
++> as detailed [here](#looking-for-fairchem-v1-models-and-code).
++
++> [!CAUTION]
++> UMA models and legacy inorganic bulk models trained using OMat24 are trained with DFT and DFT+U total energy labels.
++> These are not compatible with Materials Project calculations. If you are using UMA or models trained on OMat24 only
++> for such calculations, you can find a OMat24 specific calculations of reference unary compounds and MP2020-style
++> anion and GGA/GGA+U mixing corrections in the [OMat24 Hugging Face repo](https://huggingface.co/datasets/facebook/OMAT24).
++> Do not use MP2020 corrections or use the MP references compounds when using OMat24 trained models. Additional care
++> must be taken when computing energy differences, such as formation and energy above hull and comparing with calculations
++> in the Materials Project since DFT pseudopotentials are different and magnetic ground states may differ as well.
++
++
++## Latest news
++Oct 2025 - [check out our seamless Multi-node, Multi-GPU and LAMMPs interfaces to run large scale dynamics!](#multi-gpu-inference-and-lammps)
++
++## Read our latest release post!
++Read about the [UMA model and OMol25 dataset](https://ai.meta.com/blog/meta-fair-science-new-open-source-releases/) release.
++
++[![Meta FAIR Science Release](https://github.com/user-attachments/assets/acddd09b-ed6f-4d05-9a4b-9ba5e2301150)](https://ai.meta.com/blog/meta-fair-science-new-open-source-releases/?ref=shareable)
++
++## Try the demo!
++If you want to explore model capabilities check out our
++[educational demo](https://facebook-fairchem-uma-demo.hf.space/)
++
++[![Educational Demo](https://github.com/user-attachments/assets/7005d1bb-4459-403d-b299-d41fdd8c48ec)](https://facebook-fairchem-uma-demo.hf.space/)
++
++## Installation
++Although not required, we highly recommend installing using a package manager and virtualenv such as [uv](https://docs.astral.sh/uv/getting-started/installation/#standalone-installer), it is much faster and better at resolving dependencies than standalone pip.
++
++Install fairchem-core using pip
++```bash
++pip install fairchem-core
++```
++
++If you want to contribute or make modifications to the code, clone the repo and install in edit mode
++```bash
++git clone git@github.com:facebookresearch/fairchem.git
++
++pip install -e fairchem/packages/fairchem-core[dev]
++```
++
++## Quick Start
++The easiest way to use pretrained models is via the [ASE](https://wiki.fysik.dtu.dk/ase/) `FAIRChemCalculator`.
++A single uma model can be used for a wide range of applications in chemistry and materials science by picking the
++appropriate task name for domain specific prediction.
++
++### Instantiate a calculator from a pretrained model
++Make sure you have a Hugging Face account, have already applied for model access to the
++[UMA model repository](https://huggingface.co/facebook/UMA), and have logged in to Hugging Face using an access token.
++You can use the following to save an auth token,
++```bash
++huggingface-cli login
++```
++
++Models are referenced by their name, below are the currently supported models:
++
++| Model Name | Description |
++|---|---|
++| uma-s-1p1 | Latest version of the UMA small model, fastest of the UMA models while still SOTA on most benchmarks (6.6M/150M active/total params) |
++| uma-m-1p1 | Best in class UMA model across all metrics, but slower and more memory intensive than uma-s (50M/1.4B active/total params) |
++
++### Set the task for your application and calculate
++
++- **oc20:** use this for catalysis
++- **omat:** use this for inorganic materials
++- **omol:** use this for molecules
++- **odac:** use this for MOFs
++- **omc:** use this for molecular crystals
++
++#### Relax an adsorbate on a catalytic surface,
++```python
++from ase.build import fcc100, add_adsorbate, molecule
++from ase.optimize import LBFGS
++from fairchem.core import pretrained_mlip, FAIRChemCalculator
++
++predictor = pretrained_mlip.get_predict_unit("uma-s-1p1", device="cuda")
++calc = FAIRChemCalculator(predictor, task_name="oc20")
++
++# Set up your system as an ASE atoms object
++slab = fcc100("Cu", (3, 3, 3), vacuum=8, periodic=True)
++adsorbate = molecule("CO")
++add_adsorbate(slab, adsorbate, 2.0, "bridge")
++
++slab.calc = calc
++
++# Set up LBFGS dynamics object
++opt = LBFGS(slab)
++opt.run(0.05, 100)
++```
++
++#### Relax an inorganic crystal,
++```python
++from ase.build import bulk
++from ase.optimize import FIRE
++from ase.filters import FrechetCellFilter
++from fairchem.core import pretrained_mlip, FAIRChemCalculator
++
++predictor = pretrained_mlip.get_predict_unit("uma-s-1p1", device="cuda")
++calc = FAIRChemCalculator(predictor, task_name="omat")
++
++atoms = bulk("Fe")
++atoms.calc = calc
++
++opt = FIRE(FrechetCellFilter(atoms))
++opt.run(0.05, 100)
++```
++
++#### Run molecular MD,
++```python
++from ase import units
++from ase.io import Trajectory
++from ase.md.langevin import Langevin
++from ase.build import molecule
++from fairchem.core import pretrained_mlip, FAIRChemCalculator
++
++predictor = pretrained_mlip.get_predict_unit("uma-s-1p1", device="cuda")
++calc = FAIRChemCalculator(predictor, task_name="omol")
++
++atoms = molecule("H2O")
++atoms.calc = calc
++
++dyn = Langevin(
++    atoms,
++    timestep=0.1 * units.fs,
++    temperature_K=400,
++    friction=0.001 / units.fs,
++)
++trajectory = Trajectory("my_md.traj", "w", atoms)
++dyn.attach(trajectory.write, interval=1)
++dyn.run(steps=1000)
++```
++
++#### Calculate a spin gap,
++```python
++from ase.build import molecule
++from fairchem.core import pretrained_mlip, FAIRChemCalculator
++
++predictor = pretrained_mlip.get_predict_unit("uma-s-1p1", device="cuda")
++
++#  singlet CH2
++singlet = molecule("CH2_s1A1d")
++singlet.info.update({"spin": 1, "charge": 0})
++singlet.calc = FAIRChemCalculator(predictor, task_name="omol")
++
++#  triplet CH2
++triplet = molecule("CH2_s3B1d")
++triplet.info.update({"spin": 3, "charge": 0})
++triplet.calc = FAIRChemCalculator(predictor, task_name="omol")
++
++triplet.get_potential_energy() - singlet.get_potential_energy()
++```
++
++#### Multi-GPU Inference and LAMMPs
++If you have multiple gpus (or multiple nodes), we handle all the parallelism for you under the hood by a single flag (workers=N). For example, you can run the following 8000 atom md simulation with ~10 qps (8x H100 GPU), ~10x faster than single-gpu inference! This is also compatible with LAMMPs to perform large scale MD. See our [docs](https://fair-chem.github.io/core/common_tasks/summary.html) for more details. This requires the Ray package to be installed and comes with the extras bundle.
++```
++pip install fairchem-core[extras]
++```
++
++```python
++from ase import units
++from ase.md.langevin import Langevin
++from fairchem.core import pretrained_mlip, FAIRChemCalculator
++import time
++
++from fairchem.core.datasets.common_structures import get_fcc_carbon_xtal
++
++predictor = pretrained_mlip.get_predict_unit(
++    "uma-s-1p1", inference_settings="turbo", device="cuda", workers=8
++)
++calc = FAIRChemCalculator(predictor, task_name="omat")
++
++atoms = get_fcc_carbon_xtal(8000)
++atoms.calc = calc
++
++dyn = Langevin(
++    atoms,
++    timestep=0.1 * units.fs,
++    temperature_K=400,
++    friction=0.001 / units.fs,
++)
++# warmup 10 steps
++dyn.run(steps=10)
++start_time = time.time()
++dyn.attach(
++    lambda: print(
++        f"Step: {dyn.get_number_of_steps()}, E: {atoms.get_potential_energy():.3f} eV, "
++        f"QPS: {dyn.get_number_of_steps()/(time.time()-start_time):.2f}"
++    ),
++    interval=1,
++)
++dyn.run(steps=1000)
++```
++
++### LICENSE
++`fairchem` is available under a [MIT License](LICENSE.md). Models/checkpoint licenses vary by application area.
+diff --git a/src/fairchem/core/calculate/ase_calculator.py b/src/fairchem/core/calculate/ase_calculator.py
+index fe9db449..ac2248f1 100644
+--- a/src/fairchem/core/calculate/ase_calculator.py
++++ b/src/fairchem/core/calculate/ase_calculator.py
+@@ -13,6 +13,7 @@ from functools import partial
+ from typing import TYPE_CHECKING, Literal
+ 
+ import numpy as np
++import torch                                                                    # -------------------- EAT MODIFICATION --------------------
+ from ase.calculators.calculator import Calculator
+ from ase.stress import full_3x3_to_voigt_6_stress
+ 
+@@ -204,14 +205,60 @@ class FAIRChemCalculator(Calculator):
+             # Convert using the current a2g object
+             data_object = self.a2g(atoms)
+ 
++            # -------------------- BEGIN EAT MODIFICATION --------------------
++            # Normalize EAT and occupancy grad flag for this system                             
++            enable_eat_grad = getattr(data_object, "enable_eat_grad", False) 
++            if isinstance(enable_eat_grad, (list, tuple)):                                      
++                enable_eat_grad = any(enable_eat_grad)                                          
++            elif torch.is_tensor(enable_eat_grad):                                              
++                assert enable_eat_grad.numel() == 1, "enable_eat_grad tensor must be scalar"    
++                enable_eat_grad = bool(enable_eat_grad.item())                                  
++            else:                                                                               
++                enable_eat_grad = bool(enable_eat_grad)                                         
++            # -------------------- END EAT MODIFICATION --------------------
++            
+             # Batch and predict
+             batch = data_list_collater([data_object], otf_graph=True)
++
++            # -------------------- BEGIN EAT MODIFICATION --------------------
++            # ---- helper to grab tensors from AtomicData / dict-like ----
++            def _get(batch_obj, key):
++                if hasattr(batch_obj, key):
++                    return getattr(batch_obj, key)
++                try:
++                    return batch_obj[key]
++                except Exception:
++                    return None
++            # -------------------- END EAT MODIFICATION --------------------
++
+             pred = self.predictor.predict(batch)
+ 
++            # -------------------- BEGIN EAT MODIFICATION --------------------
++            eat_w = getattr(getattr(self.predictor, "_last_data_device", None), "eat_weights", None)
++            if enable_eat_grad and eat_w is None:
++                raise RuntimeError("enable_eat_grad=True but predictor._last_data_device.eat_weights is missing")
++            # -------------------- END EAT MODIFICATION --------------------
++
+             # Collect the results into self.results
+             self.results = {}
+             for calc_key in self.implemented_properties:
+                 if calc_key == "energy":
++                    # -------------------- BEGIN EAT MODIFICATION --------------------
++                    E_tensor = pred[calc_key]
++                    if enable_eat_grad:
++                        g = torch.autograd.grad(
++                            E_tensor.sum(),
++                            eat_w,
++                            retain_graph=False,
++                            create_graph=False,
++                            allow_unused=True,
++                        )[0]
++                        if g is None:
++                            # if model path somehow doesn't touch eat_w, avoid crashing
++                            g = torch.zeros_like(eat_w)
++                        self.results["eat_grad"] = g.detach().cpu().numpy()
++                    # -------------------- END EAT MODIFICATION --------------------
++
+                     energy = float(pred[calc_key].detach().cpu().numpy()[0])
+ 
+                     self.results["energy"] = self.results["free_energy"] = (
+@@ -225,6 +272,11 @@ class FAIRChemCalculator(Calculator):
+                     stress_voigt = full_3x3_to_voigt_6_stress(stress)
+                     self.results["stress"] = stress_voigt
+ 
++            # Do not hold onto device tensors after an EAT call. The next prediction
++            # will repopulate this handle before the calculator asks for eat_grad.
++            if hasattr(self.predictor, "_last_data_device"):
++                self.predictor._last_data_device = None
++
+     def _get_single_atom_energies(self, atoms) -> dict:
+         """
+         Populate output with single atom energies
+diff --git a/src/fairchem/core/datasets/atomic_data.py b/src/fairchem/core/datasets/atomic_data.py
+index 14450f0c..d689a62b 100644
+--- a/src/fairchem/core/datasets/atomic_data.py
++++ b/src/fairchem/core/datasets/atomic_data.py
+@@ -52,7 +52,7 @@ _REQUIRED_KEYS = [
+     "tags",
+ ]
+ 
+-_OPTIONAL_KEYS = ["energy", "forces", "stress", "dataset"]
++_OPTIONAL_KEYS = ["energy", "forces", "stress", "dataset", "eat_weights", "enable_eat_grad", "occupancy", "enable_occ_grad",]    # -------------------- EAT MODIFICATION --------------------
+ 
+ # TODO: potential future keys
+ # ["virials", "atom_attr", "edge_attr"]
+@@ -146,6 +146,8 @@ class AtomicData:
+         batch: torch.Tensor | None = None,  # (num_node,)
+         sid: list[str] | None = None,
+         dataset: list[str] | str | None = None,
++        eat_weights: torch.Tensor | None = None,   # (num_node, max_num_elements (?))               # -------------------- EAT MODIFICATION --------------------
++        enable_eat_grad: bool = False,               # whether to enable eat_grad computation       # -------------------- EAT MODIFICATION --------------------
+     ):
+         self.__keys__ = set(_REQUIRED_KEYS)
+ 
+@@ -167,7 +169,14 @@ class AtomicData:
+ 
+         if dataset is not None:
+             self.dataset = dataset
+-
++        
++        # -------------------- BEGIN EAT MODIFICATION --------------------
++        # Assign eat_weights to AtomicData object                 
++        if eat_weights is not None:                                             
++            self.eat_weights = eat_weights    
++        self.enable_eat_grad = enable_eat_grad  
++        # -------------------- END EAT MODIFICATION --------------------                                
++        
+         # tagets
+         if energy is not None:
+             self.energy = energy
+@@ -248,6 +257,13 @@ class AtomicData:
+                 assert isinstance(self.dataset, str)
+                 assert self.num_graphs == 1
+ 
++        # make sure eat_weights and occupancy has compatible dims                                               # -------------------- EAT MODIFICATION --------------------
++        if hasattr(self, "eat_weights"):                                                                        # -------------------- EAT MODIFICATION --------------------
++            assert self.eat_weights.shape[0] == self.pos.shape[0], "eat_weights must have one row per atom"     # -------------------- EAT MODIFICATION --------------------       
++            # Usually (num_nodes, max_num_elements) – you know max_num_elements                                 # -------------------- EAT MODIFICATION --------------------
++            assert self.eat_weights.dim() == 2, "eat_weights must be 2D"                                        # -------------------- EAT MODIFICATION --------------------
++            assert self.eat_weights.dtype in (torch.float32, torch.float64)                                     # -------------------- EAT MODIFICATION --------------------
++
+         # dtype checks
+         assert (
+             self.pos.dtype == self.cell.dtype == self.cell_offsets.dtype
+@@ -340,6 +356,38 @@ class AtomicData:
+         cell = torch.from_numpy(cell).to(target_dtype).view(1, 3, 3)
+         natoms = torch.tensor([pos.shape[0]], dtype=torch.long)
+ 
++
++        # -------------------- BEGIN EAT MODIFICATION --------------------
++        # EAT weights, if present                                                           
++        eat_weights = None                                                                  
++        enable_eat_grad = bool(atoms.info.get("enable_eat_grad", False))                    
++        if "eat_weights" in atoms.arrays:                                                   
++            eat_np = np.array(atoms.arrays["eat_weights"], copy=True)                       
++            # expect shape (natoms, max_num_elements) or (natoms, n_basis)                  
++            eat_weights = torch.tensor(                                                     
++                eat_np,                                                                     
++                dtype=target_dtype,                                                         
++                requires_grad=enable_eat_grad,                                              
++            )   
++        elif "eat_weights_live" in atoms.info:
++            eat_weights = atoms.info["eat_weights_live"]
++            assert torch.is_tensor(eat_weights), \
++                "atoms.info['eat_weights_live'] must be a torch Tensor"
++            # --- sanity checks BEFORE touching it ---
++            if enable_eat_grad:
++                assert eat_weights.requires_grad, "eat_weights_live must already require grad"
++                assert eat_weights.is_leaf, "eat_weights_live must be a leaf"
++                assert eat_weights.grad_fn is None, "eat_weights_live must be a leaf (grad_fn=None)"
++            # --- dtype/device handling WITHOUT breaking graph ---
++            if eat_weights.dtype != target_dtype:
++                raise RuntimeError(
++                    f"eat_weights_live has wrong dtype. Expected {target_dtype}, got {eat_weights.dtype}."
++                )
++            if enable_eat_grad:
++                # This is safe: does nothing if already True
++                eat_weights.requires_grad_(True)
++        # -------------------- END EAT MODIFICATION --------------------
++
+         # graph construction
+         if r_edges:
+             assert (
+@@ -448,6 +496,8 @@ class AtomicData:
+             stress=stress,
+             sid=[sid] if isinstance(sid, str) else sid,
+             dataset=task_name,
++            eat_weights=eat_weights,                                                    # -------------------- EAT MODIFICATION --------------------
++            enable_eat_grad=enable_eat_grad,                                            # -------------------- EAT MODIFICATION --------------------
+         )
+ 
+         return data
+@@ -487,6 +537,9 @@ class AtomicData:
+         if self.sid is not None:
+             atoms.info["sid"] = self.sid
+ 
++        if hasattr(self, "eat_weights"):                                            # -------------------- EAT MODIFICATION --------------------
++            atoms.set_array("eat_weights", self.eat_weights.cpu().numpy())          # -------------------- EAT MODIFICATION --------------------
++        atoms.info["enable_eat_grad"] = self.enable_eat_grad                        # -------------------- EAT MODIFICATION --------------------
+         return atoms
+ 
+     def to_ase(self) -> list[ase.Atoms]:
+@@ -518,6 +571,8 @@ class AtomicData:
+             batch=dictionary.get("batch", None),
+             sid=dictionary.get("sid", None),
+             dataset=dictionary.get("dataset", None),
++            eat_weights=dictionary.get("eat_weights", None),            # -------------------- EAT MODIFICATION --------------------
++            enable_eat_grad=dictionary.get("enable_eat_grad", False),   # -------------------- EAT MODIFICATION --------------------
+         )
+ 
+         # TODO: may require validation for them in the future
+@@ -685,14 +740,25 @@ class AtomicData:
+         r"""Performs a deep-copy of the data object."""
+         data_dict = {}
+         for key in self.__keys__:
+-            if torch.is_tensor(self[key]):
++            # -------------------- BEGIN EAT MODIFICATION --------------------
++            if key == "eat_weights":
++                data_dict[key] = self[key]   # preserve the exact tensor object
++            elif torch.is_tensor(self[key]):
+                 data_dict[key] = self[key].clone()
+             else:
+-                # TODO: with this we should stop making sid special.
+                 data_dict[key] = copy.deepcopy(self[key])
+-                # ""
+-                # print(key)
+-                # raise ValueError("keys must correspond to torch tensors.")
++            # -------------------- END EAT MODIFICATION --------------------
++
++            # --- BEGIN ORIGINAL CODE -----
++            # if torch.is_tensor(self[key]):
++            #     data_dict[key] = self[key].clone()
++            # else:
++            #     # TODO: with this we should stop making sid special.
++            #     data_dict[key] = copy.deepcopy(self[key])
++            #     # ""
++            #     # print(key)
++            #     # raise ValueError("keys must correspond to torch tensors.")
++            # --- END ORIGINAL CODE -----
+         data_dict["sid"] = copy.deepcopy(self.sid)
+         data_dict["batch"] = self.batch.clone()
+         batch_stats = copy.deepcopy(self.get_batch_stats())
+@@ -891,7 +957,6 @@ def atomicdata_list_to_batch(
+         cat_dim = 0 if cat_dim is None else cat_dim
+         if torch.is_tensor(item):
+             batched_data_dict[key] = torch.cat(items, cat_dim)
+-
+         # TODO: this allows non-tensor fields to be batched.
+         # we might want to remove support for that.
+         else:
+diff --git a/src/fairchem/core/models/uma/escn_md.py b/src/fairchem/core/models/uma/escn_md.py
+index 9cd36d9a..775188ff 100644
+--- a/src/fairchem/core/models/uma/escn_md.py
++++ b/src/fairchem/core/models/uma/escn_md.py
+@@ -448,7 +448,14 @@ class eSCNMDBackbone(nn.Module, MOLEInterface):
+                 graph_dict["node_partition"]
+             ]
+             data_dict["batch"] = data_dict["batch_full"][graph_dict["node_partition"]]
+-
++            # -------------------- BEGIN EAT MODIFICATION --------------------
++            if "eat_weights_full" in data_dict:                                                 
++                data_dict["eat_weights"] = data_dict["eat_weights_full"][                       
++                    graph_dict["node_partition"]                                                
++                ]                                                                               
++            if "occupancy_full" in data_dict:                                                           
++                data_dict["occupancy"] = data_dict["occupancy_full"][graph_dict["node_partition"]]      
++            # -------------------- END EAT MODIFICATION --------------------
+         if self.edge_chunk_size is not None:
+             pad_edges(graph_dict, self.edge_chunk_size, self.cutoff)
+ 
+@@ -459,7 +466,14 @@ class eSCNMDBackbone(nn.Module, MOLEInterface):
+         data_dict["atomic_numbers"] = data_dict["atomic_numbers"].long()
+         data_dict["atomic_numbers_full"] = data_dict["atomic_numbers"]
+         data_dict["batch_full"] = data_dict["batch"]
+-
++        # -------------------- BEGIN EAT MODIFICATION --------------------
++        if "eat_weights" in data_dict:                                               
++            data_dict["eat_weights_full"] = data_dict["eat_weights"]                 
++            # Define occupancy as sum of EAT weights per atom
++            occ = data_dict["eat_weights_full"].sum(dim=1)  # (N,)
++            data_dict["occupancy"] = occ.to(data_dict["pos"].dtype) 
++            data_dict["occupancy_full"] = data_dict["occupancy"]            
++        # -------------------- END EAT MODIFICATION --------------------
+         csd_mixed_emb = self.csd_embedding(
+             charge=data_dict["charge"],
+             spin=data_dict["spin"],
+@@ -470,6 +484,7 @@ class eSCNMDBackbone(nn.Module, MOLEInterface):
+             atomic_numbers_full=data_dict["atomic_numbers_full"],
+             batch_full=data_dict["batch_full"],
+             csd_mixed_emb=csd_mixed_emb,
++            eat_weights_full=data_dict.get("eat_weights_full", None),               # -------------------- EAT MODIFICATION --------------------
+         )
+ 
+         with record_function("get_displacement_and_cell"):
+@@ -477,6 +492,8 @@ class eSCNMDBackbone(nn.Module, MOLEInterface):
+ 
+         with record_function("generate_graph"):
+             graph_dict = self._generate_graph(data_dict)
++        
++        occ_full, edge_gate = self._get_occupancy_tensors(data_dict, graph_dict)         # -------------------- EAT MODIFICATION --------------------
+ 
+         if graph_dict["edge_index"].numel() == 0:
+             raise ValueError(
+@@ -503,9 +520,12 @@ class eSCNMDBackbone(nn.Module, MOLEInterface):
+                 device=data_dict["pos"].device,
+                 dtype=data_dict["pos"].dtype,
+             )
+-            x_message[:, 0, :] = self.sphere_embedding(data_dict["atomic_numbers"])
++            # x_message[:, 0, :] = self.sphere_embedding(data_dict["atomic_numbers"])              # -------------------- ORIGINAL CODE --------------------
++            x_message[:, 0, :] = self._get_node_sphere_embedding(data_dict)                        # -------------------- EAT MODIFICATION --------------------
+ 
+         sys_node_embedding = csd_mixed_emb[data_dict["batch"]]
++        # if occ_full is not None:                                                                     # -------------------- EAT MODIFICATION --------------------
++        #     sys_node_embedding = sys_node_embedding * occ_full.reshape(-1, 1)                        # -------------------- EAT MODIFICATION --------------------
+         x_message[:, 0, :] = x_message[:, 0, :] + sys_node_embedding
+ 
+         ###
+@@ -522,15 +542,28 @@ class eSCNMDBackbone(nn.Module, MOLEInterface):
+         with record_function("edge embedding"):
+             dist_scaled = graph_dict["edge_distance"] / self.cutoff
+             edge_envelope = self.envelope(dist_scaled).reshape(-1, 1, 1)
++            # -------------------- BEGIN EAT MODIFICATION --------------------
++            if edge_gate is not None:
++                edge_envelope = edge_envelope * edge_gate.to(edge_envelope.dtype).view(-1,1,1)
++            # -------------------- END EAT MODIFICATION --------------------
+             edge_distance_embedding = self.distance_expansion(
+                 graph_dict["edge_distance"]
+             )
+-            source_embedding = self.source_embedding(
+-                data_dict["atomic_numbers_full"][graph_dict["edge_index"][0]]
+-            )
+-            target_embedding = self.target_embedding(
+-                data_dict["atomic_numbers_full"][graph_dict["edge_index"][1]]
+-            )
++            # # -------------------- BEGIN ORIGINAL CODE --------------------
++            # source_embedding = self.source_embedding(                                 
++            #     data_dict["atomic_numbers_full"][graph_dict["edge_index"][0]]         
++            # )                                                                         
++            # target_embedding = self.target_embedding(                                 
++            #     data_dict["atomic_numbers_full"][graph_dict["edge_index"][1]]         
++            # )                                                                         
++            # # -------------------- END ORIGINAL CODE --------------------
++
++            # -------------------- BEGIN EAT MODIFICATION --------------------
++            source_embedding, target_embedding = self._get_edge_endpoint_embeddings(    
++                data_dict, graph_dict                                                   
++            )                                               
++            # -------------------- END EAT MODIFICATION --------------------
++
+             x_edge = torch.cat(
+                 (edge_distance_embedding, source_embedding, target_embedding), dim=1
+             )
+@@ -635,6 +668,74 @@ class eSCNMDBackbone(nn.Module, MOLEInterface):
+                     no_wd_list.append(global_parameter_name)
+ 
+         return set(no_wd_list)
++    
++    # -------------------- BEGIN EAT MODIFICATION --------------------
++    def _get_node_sphere_embedding(self, data_dict):                                        
++        """                                                                                 
++        Returns per-node scalar embedding of shape (num_nodes, sphere_channels).            
++        If `eat_weights` is present, uses it to make a linear combination of                
++        element embeddings. Otherwise falls back to standard atomic_numbers lookup.         
++        """                                                                                 
++        if "eat_weights" in data_dict:                                                  
++            weights = data_dict["eat_weights"]  # (num_nodes, n_elems)  
++            elem_emb = self.sphere_embedding.weight  # (max_num_elements, sphere_channels)  
++            # sanity checks                                                                 
++            assert weights.dim() == 2                                                       
++            assert weights.shape[1] == elem_emb.shape[0], (                                 
++                f"eat_weights second dim {weights.shape[1]} "                               
++                f"!= sphere_embedding size {elem_emb.shape[0]}"                             
++            )                                                                               
++            # match dtype just in case                                                      
++            weights = weights.to(elem_emb.dtype)                                            
++            # (num_nodes, sphere_channels)                                                  
++            return weights @ elem_emb                                                       
++        else:                                                                               
++            return self.sphere_embedding(data_dict["atomic_numbers"])                       
++
++    def _get_edge_endpoint_embeddings(self, data_dict, graph_dict):                                             
++        """                                                                                 
++        Returns source_embedding, target_embedding for edges.                               
++        Uses EAT weights if present, else falls back to integer embeddings.                 
++        """                                                                                 
++        if "eat_weights_full" in data_dict:                                                 
++            weights_full = data_dict["eat_weights_full"]  # (N, Z)                          
++            src_w = weights_full[graph_dict["edge_index"][0]]  # (E, Z)                     
++            tgt_w = weights_full[graph_dict["edge_index"][1]]  # (E, Z)                     
++            assert weights_full.shape[1] == self.source_embedding.weight.shape[0]           
++            src_emb = src_w @ self.source_embedding.weight   # (E, edge_channels)           
++            tgt_emb = tgt_w @ self.target_embedding.weight   # (E, edge_channels)           
++            return src_emb, tgt_emb                                                         
++        else:                                                                               
++            src_emb = self.source_embedding(                                                
++                data_dict["atomic_numbers_full"][graph_dict["edge_index"][0]]               
++            )                                                                               
++            tgt_emb = self.target_embedding(                                                
++                data_dict["atomic_numbers_full"][graph_dict["edge_index"][1]]               
++            )                                                                               
++            return src_emb, tgt_emb                             
++
++    def _get_occupancy_tensors(self, data_dict, graph_dict):
++        # If occupancy_full isn't provided, derive it from eat_weights_full if possible
++        if "occupancy_full" not in data_dict:
++            if "eat_weights_full" not in data_dict:
++                return None, None
++            data_dict["occupancy_full"] = data_dict["eat_weights_full"].sum(dim=1).to(data_dict["pos"].dtype)
++
++            # also ensure partitioned occupancy exists (for heads / node gating)
++            if "occupancy" not in data_dict:
++                if "node_partition" in graph_dict:
++                    data_dict["occupancy"] = data_dict["occupancy_full"][graph_dict["node_partition"]]
++                else:
++                    data_dict["occupancy"] = data_dict["occupancy_full"]
++
++        occ_full = data_dict["occupancy_full"].to(data_dict["pos"].dtype)
++
++        src = graph_dict["edge_index"][0]
++        dst = graph_dict["edge_index"][1]
++        edge_gate = occ_full[src] * occ_full[dst]
++        return occ_full, edge_gate
++
++    # -------------------- END EAT MODIFICATION --------------------
+ 
+ 
+ class MLP_EFS_Head(nn.Module, HeadInterface):
+@@ -687,6 +788,14 @@ class MLP_EFS_Head(nn.Module, HeadInterface):
+         _input = emb["node_embedding"].narrow(1, 0, 1).squeeze(1)
+         _output = self.energy_block(_input)
+         node_energy = _output.view(-1, 1, 1)
++
++        # --------------------- BEGIN EAT MODIFICATION --------------------
++        # occupancy gate
++        if "occupancy" in data:
++            occ = data["occupancy"].to(node_energy.dtype).view(-1, 1, 1)
++            node_energy = node_energy * occ
++        # --------------------- END EAT MODIFICATION --------------------
++
+         energy_part = torch.zeros(
+             len(data["natoms"]), device=data["pos"].device, dtype=node_energy.dtype
+         )
+@@ -704,13 +813,50 @@ class MLP_EFS_Head(nn.Module, HeadInterface):
+             outputs["embeddings"] = (
+                 {"embeddings": embeddings} if self.wrap_property else embeddings
+             )
++        
++        # ---------------------- BEGIN EAT MODIFICATION --------------------
++        # Normalize enable_eat_grad to a plain bool                                     
++        flag = getattr(data, "enable_eat_grad", False)                                  
++        if isinstance(flag, (list, tuple)):                                             
++            flag = any(flag)                                                            
++        elif torch.is_tensor(flag):                                                     
++            assert flag.numel() == 1, "enable_eat_grad tensor must be scalar"           
++            flag = bool(flag.item())                                                    
++        else:                                                                           
++            flag = bool(flag)  
++        # Low-memory EAT relaxation: forces are needed as numerical first
++        # derivatives for ionic relaxation, but ordinary EAT does not need the
++        # forces themselves to remain differentiable with respect to species
++        # weights. Keep the energy graph only until the calculator takes
++        # dE/d(eat_weights).
++        if flag and (self.regress_stress or not self.regress_forces):    
++            forces = (                                                                                                                    
++                -1                                                                                                                      
++                * torch.autograd.grad(                                                                                                  
++                    energy_part.sum(), data["pos"], create_graph=False, retain_graph=True,  
++                )[0]                                                                                                                    
++            )         
++            if gp_utils.initialized():
++                forces = gp_utils.reduce_from_model_parallel_region(forces)
++            outputs[forces_key] = {"forces": forces} if self.wrap_property else forces
++        # ---------------------- END EAT MODIFICATION --------------------                                                      
+ 
+         if self.regress_stress:
+-            grads = torch.autograd.grad(
+-                [energy_part.sum()],
+-                [data["pos_original"], emb["displacement"]],
+-                create_graph=self.training,
+-            )
++            # --------------------- BEGIN EAT MODIFICATION --------------------
++            if flag:                                                                    
++                grads = torch.autograd.grad(                                            
++                    [energy_part.sum()],                                                
++                    [data["pos_original"], emb["displacement"]],                        
++                    create_graph=False,                                         
++                    retain_graph=True,          # retain graph for EAT grad calc        
++                )
++            # --------------------- END EAT MODIFICATION --------------------                                                                       
++            else:
++                grads = torch.autograd.grad(
++                    [energy_part.sum()],
++                    [data["pos_original"], emb["displacement"]],
++                    create_graph=self.training,
++                )
+             if gp_utils.initialized():
+                 grads = (
+                     gp_utils.reduce_from_model_parallel_region(grads[0]),
+@@ -725,16 +871,30 @@ class MLP_EFS_Head(nn.Module, HeadInterface):
+             stress = stress.view(
+                 -1, 9
+             )  # NOTE to work better with current Multi-task trainer
+-            outputs[forces_key] = {"forces": forces} if self.wrap_property else forces
++            # ------------------- BEGIN EAT MODIFICATION --------------------
++            if not flag:
++                outputs[forces_key] = {"forces": forces} if self.wrap_property else forces # Only set forces if not already set above
++            # ------------------- END EAT MODIFICATION --------------------
++            # outputs[forces_key] = {"forces": forces} if self.wrap_property else forces # original code
+             outputs[stress_key] = {"stress": stress} if self.wrap_property else stress
+             data["cell"] = emb["orig_cell"]
+         elif self.regress_forces:
+-            forces = (
+-                -1
+-                * torch.autograd.grad(
+-                    energy_part.sum(), data["pos"], create_graph=self.training
+-                )[0]
+-            )
++            # -------------------- BEGIN EAT MODIFICATION --------------------
++            if flag:    
++                forces = (                                                                                                                    
++                    -1                                                                                                                      
++                    * torch.autograd.grad(                                                                                                  
++                        energy_part.sum(), data["pos"], create_graph=False, retain_graph=True,   # retain graph for EAT grad calc   
++                    )[0]                                                                                                                    
++                )                                                                                                                           
++            # -------------------- END EAT MODIFICATION --------------------
++            else:
++                forces = (
++                    -1
++                    * torch.autograd.grad(
++                        energy_part.sum(), data["pos"], create_graph=self.training,
++                    )[0]
++                )
+             if gp_utils.initialized():
+                 forces = gp_utils.reduce_from_model_parallel_region(forces)
+             outputs[forces_key] = {"forces": forces} if self.wrap_property else forces
+@@ -763,6 +923,27 @@ class MLP_Energy_Head(nn.Module, HeadInterface):
+             emb["node_embedding"].narrow(1, 0, 1).squeeze(1)
+         ).view(-1, 1, 1)
+ 
++        # ----------------------- BEGIN EAT MODIFICATION --------------------
++        if "occupancy" in data_dict:
++            occ = data_dict["occupancy"].to(node_energy.dtype).view(-1, 1, 1)
++            node_energy = node_energy * occ
++            # Effective natoms under occupancy (per system)
++            occ = data_dict["occupancy"].to(node_energy.dtype).view(-1)  # (N,)
++            occ_sum = torch.zeros(
++                len(data_dict["natoms"]),
++                device=node_energy.device,
++                dtype=node_energy.dtype,
++            ).index_add_(0, data_dict["batch"], occ)
++
++            if gp_utils.initialized():
++                occ_sum = gp_utils.reduce_from_model_parallel_region(occ_sum)
++
++            occ_sum = occ_sum.clamp_min(1e-12)
++        else:
++            occ_sum = data_dict["natoms"].to(node_energy.dtype)
++
++        # ----------------------- END EAT MODIFICATION --------------------
++
+         energy_part = torch.zeros(
+             len(data_dict["natoms"]),
+             device=node_energy.device,
+@@ -778,7 +959,8 @@ class MLP_Energy_Head(nn.Module, HeadInterface):
+         if self.reduce == "sum":
+             return {"energy": energy}
+         elif self.reduce == "mean":
+-            return {"energy": energy / data_dict["natoms"]}
++            # return {"energy": energy / data_dict["natoms"]} # ----------------------- ORIGINAL CODE --------------------
++            return {"energy": energy / occ_sum}
+         else:
+             raise ValueError(
+                 f"reduce can only be sum or mean, user provided: {self.reduce}"
+@@ -798,6 +980,26 @@ class Linear_Energy_Head(nn.Module, HeadInterface):
+             emb["node_embedding"].narrow(1, 0, 1).squeeze(1)
+         ).view(-1, 1, 1)
+ 
++        # ----------------------- BEGIN EAT MODIFICATION --------------------
++        if "occupancy" in data_dict:
++            occ = data_dict["occupancy"].to(node_energy.dtype).view(-1, 1, 1)
++            node_energy = node_energy * occ
++            # Effective natoms under occupancy (per system)
++            occ = data_dict["occupancy"].to(node_energy.dtype).view(-1)  # (N,)
++            occ_sum = torch.zeros(
++                len(data_dict["natoms"]),
++                device=node_energy.device,
++                dtype=node_energy.dtype,
++            ).index_add_(0, data_dict["batch"], occ)
++
++            if gp_utils.initialized():
++                occ_sum = gp_utils.reduce_from_model_parallel_region(occ_sum)
++
++            occ_sum = occ_sum.clamp_min(1e-12)
++        else:
++            occ_sum = data_dict["natoms"].to(node_energy.dtype)
++        # ----------------------- END EAT MODIFICATION --------------------
++
+         energy_part = torch.zeros(
+             len(data_dict["natoms"]),
+             device=node_energy.device,
+@@ -814,7 +1016,8 @@ class Linear_Energy_Head(nn.Module, HeadInterface):
+         if self.reduce == "sum":
+             return {"energy": energy}
+         elif self.reduce == "mean":
+-            return {"energy": energy / data_dict["natoms"]}
++            # return {"energy": energy / data_dict["natoms"]} # ----------------------- ORIGINAL CODE --------------------
++            return {"energy": energy / occ_sum}
+         else:
+             raise ValueError(
+                 f"reduce can only be sum or mean, user provided: {self.reduce}"
+diff --git a/src/fairchem/core/models/uma/escn_moe.py b/src/fairchem/core/models/uma/escn_moe.py
+index efedfbb6..af096109 100644
+--- a/src/fairchem/core/models/uma/escn_moe.py
++++ b/src/fairchem/core/models/uma/escn_moe.py
+@@ -90,6 +90,7 @@ class eSCNMDMoeBackbone(eSCNMDBackbone, MOLEInterface):
+             atomic_numbers_full=data["atomic_numbers"],
+             batch_full=data["batch"],
+             csd_mixed_emb=csd_mixed_emb,
++            eat_weights_full=data.get("eat_weights_full", None),  # -------------------- EAT MODIFICATION --------------------
+         )
+         if self.mole_type != "so2":
+             raise ValueError("Only mole_type=so2 supported for merging")
+@@ -109,23 +110,68 @@ class eSCNMDMoeBackbone(eSCNMDBackbone, MOLEInterface):
+         new_model.eval()
+         return new_model
+ 
+-    def set_MOLE_coefficients(self, atomic_numbers_full, batch_full, csd_mixed_emb):
++    def set_MOLE_coefficients(
++        self,
++        atomic_numbers_full,
++        batch_full,
++        csd_mixed_emb,
++        eat_weights_full=None,                                                                  # -------------------- EAT MODIFICATION --------------------
++    ):
+         if self.num_experts == 0:
+             return
+         with torch.autocast(device_type=atomic_numbers_full.device.type, enabled=False):
+             embeddings = []
+             if self.use_composition_embedding:
+-                composition_by_atom = self.composition_embedding(atomic_numbers_full)
+-                composition = composition_by_atom.new_zeros(
+-                    csd_mixed_emb.shape[0],
+-                    self.sphere_channels,
+-                ).index_reduce_(
+-                    0,
+-                    batch_full,
+-                    composition_by_atom,
+-                    reduce="mean",
+-                    include_self=np.isclose(self.model_version, 1.0).item(),
+-                )
++                # -------------------- BEGIN EAT MODIFICATION --------------------
++                if eat_weights_full is not None:                                                
++                    W = self.composition_embedding.weight  # (Z, C)
++
++                    occ_full = eat_weights_full.sum(dim=1, keepdim=True)          # (N,1)
++                    comp_full = eat_weights_full / occ_full.clamp_min(1e-8)       # (N,Z)
++
++                    composition_by_atom = comp_full.to(W.dtype) @ W               # (N,C)
++                    weights = occ_full.to(composition_by_atom.dtype)              # (N,1)
++
++                    composition = composition_by_atom.new_zeros(csd_mixed_emb.size(0), self.sphere_channels)
++                    composition.index_add_(0, batch_full, composition_by_atom * weights)
++
++                    occ_sum = composition_by_atom.new_zeros(csd_mixed_emb.size(0), 1)
++                    occ_sum.index_add_(0, batch_full, weights)
++
++                    if np.isclose(self.model_version, 1.0).item():
++                        occ_sum = occ_sum + 1.0   # <- include_self analogue
++
++                    composition = composition / occ_sum.clamp_min(1e-8)
++
++                # ------------------- END EAT MODIFICATION --------------------
++                else:
++                    # Original path: composition from integer atomic_numbers
++                    composition_by_atom = self.composition_embedding(atomic_numbers_full)
++                    # fallback: original mean
++                    composition = composition_by_atom.new_zeros(
++                        csd_mixed_emb.shape[0],
++                        self.sphere_channels,
++                    ).index_reduce_(
++                        0,
++                        batch_full,
++                        composition_by_atom,
++                        reduce="mean",
++                        include_self=np.isclose(self.model_version, 1.0).item(),
++                    )
++
++                # # -------------------- BEGIN ORIGINAL CODE --------------------
++                # composition = composition_by_atom.new_zeros(
++                #     csd_mixed_emb.shape[0],
++                #     self.sphere_channels,
++                # ).index_reduce_(
++                #     0,
++                #     batch_full,
++                #     composition_by_atom,
++                #     reduce="mean",
++                #     include_self=np.isclose(self.model_version, 1.0).item(),
++                # )
++                # # -------------------- END ORIGINAL CODE --------------------
++
+                 embeddings.append(composition.unsqueeze(0))
+             embeddings.append(csd_mixed_emb[None])
+ 
+diff --git a/src/fairchem/core/modules/normalization/element_references.py b/src/fairchem/core/modules/normalization/element_references.py
+index 0905982a..2ad3e076 100644
+--- a/src/fairchem/core/modules/normalization/element_references.py
++++ b/src/fairchem/core/modules/normalization/element_references.py
+@@ -38,14 +38,44 @@ class ElementReferences(nn.Module):
+     def compute_references(batch, tensor, elem_refs, operation):
+         assert tensor.shape[0] == len(batch.natoms)
+         with torch.autocast(elem_refs.device.type, enabled=False):
+-            refs = torch.zeros(
+-                tensor.shape, dtype=elem_refs.dtype, device=tensor.device
+-            ).scatter_reduce(
+-                0,
+-                batch.batch_full,
+-                elem_refs[batch.atomic_numbers_full],
+-                reduce="sum",
+-            )
++            # -------------------- BEGIN EAT MODIFICATION --------------------
++            if hasattr(batch, "eat_weights_full"):                                      
++                # EAT: elem_refs is per-element; compute per-atom refs                  
++                # batch.eat_weights_full: (N, Z)                                        
++                weights = batch.eat_weights_full.to(elem_refs.device)                   
++                # elem_refs: shape compatible with Z, e.g. (Z,) or (Z, D, ...)          
++                # simplest 1D case:                                                     
++                per_atom_refs = (weights * elem_refs.unsqueeze(0)).sum(dim=1)           
++                refs = torch.zeros(                                                     
++                    tensor.shape, dtype=elem_refs.dtype, device=tensor.device          
++                ).scatter_reduce(                                                      
++                    0,                                                                 
++                    batch.batch_full,                                                  
++                    per_atom_refs,                                                     
++                    reduce="sum",                                                      
++                )   
++            else:
++                per_atom_refs = elem_refs[batch.atomic_numbers_full]  # (N,)
++                refs = torch.zeros(
++                    tensor.shape, dtype=elem_refs.dtype, device=tensor.device
++                ).scatter_reduce(
++                    0,
++                    batch.batch_full,
++                    per_atom_refs,
++                    reduce="sum",
++                )
++            # -------------------- END EAT MODIFICATION --------------------
++
++            # # ORIGINAL CODE
++            # refs = torch.zeros(
++            #         tensor.shape, dtype=elem_refs.dtype, device=tensor.device
++            #     ).scatter_reduce(
++            #         0,
++            #         batch.batch_full,
++            #         elem_refs[batch.atomic_numbers_full],
++            #         reduce="sum",
++            # )
++
+             if operation == "subtract":
+                 return tensor - refs
+             elif operation == "add":
+diff --git a/src/fairchem/core/units/mlip_unit/predict.py b/src/fairchem/core/units/mlip_unit/predict.py
+index 35c59c21..580797a1 100644
+--- a/src/fairchem/core/units/mlip_unit/predict.py
++++ b/src/fairchem/core/units/mlip_unit/predict.py
+@@ -253,6 +253,24 @@ class MLIPPredictUnit(PredictUnit[AtomicData], MLIPPredictUnitProtocol):
+         # this needs to be .clone() to avoid issues with graph parallel modifying this data with MOLE
+         data_device = data.to(self.device).clone()
+ 
++        # ------------------- BEGIN EAT MODIFICATION -------------------
++        self._last_data_device = data_device
++        # ---- EAT grad flag helper ----
++        flag = getattr(data_device, "enable_eat_grad", False)
++        if isinstance(flag, (list, tuple)):
++            flag = any(flag)
++        elif torch.is_tensor(flag):
++            flag = bool(flag.item())
++        else:
++            flag = bool(flag)
++
++        # If we're doing EAT grads, we must NOT run in no_grad and we must ensure the
++        # *device-side* eat_weights are the ones requiring grad.
++        if flag and hasattr(data_device, "eat_weights") and data_device.eat_weights is not None:
++            # Make the tensor used by the model a leaf that requires grad
++            data_device.eat_weights = data_device.eat_weights.requires_grad_(True)
++        # ------------------- END EAT MODIFICATION -------------------
++
+         if self.inference_mode.merge_mole:
+             if self.merged_on is None:
+                 # only get embeddings after moved to final device to get right types
+@@ -282,7 +300,14 @@ class MLIPPredictUnit(PredictUnit[AtomicData], MLIPPredictUnitProtocol):
+                     self.merged_on[1] == this_sys[1]
+                 ), f"Cannot run on merged model on system. Dataset is different {self.merged_on[1]} vs {this_sys[1]}"
+ 
+-        inference_context = torch.no_grad() if self.direct_forces else nullcontext()
++        # -------------------- BEGIN EAT MODIFICATION -------------------
++        if flag:
++            inference_context = nullcontext()  # keep grads ON
++        else:
++            inference_context = torch.no_grad() if self.direct_forces else nullcontext()
++        # -------------------- END EAT MODIFICATION -------------------
++
++        # inference_context = torch.no_grad() if self.direct_forces else nullcontext() # original code
+         tf32_context = (
+             tf32_context_manager() if self.inference_mode.tf32 else nullcontext()
+         )

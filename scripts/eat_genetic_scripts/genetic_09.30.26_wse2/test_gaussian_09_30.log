@@ -1,0 +1,13 @@
+test_extra_z_padding_preserves_measured_field (test_gaussian_09_30.GaussianTests.test_extra_z_padding_preserves_measured_field) ... ok
+test_gaussian_symmetry_mass_and_no_envelope (test_gaussian_09_30.GaussianTests.test_gaussian_symmetry_mass_and_no_envelope) ... ok
+test_invalid_sigma (test_gaussian_09_30.GaussianTests.test_invalid_sigma) ... ok
+test_isolated_w_peak_and_overlapping_atoms (test_gaussian_09_30.GaussianTests.test_isolated_w_peak_and_overlapping_atoms) ... ok
+test_obsolete_gain_is_rejected (test_gaussian_09_30.GaussianTests.test_obsolete_gain_is_rejected) ... ok
+test_production_config_box_prefit_serialization_checkpoint (test_gaussian_09_30.GaussianTests.test_production_config_box_prefit_serialization_checkpoint) ... ok
+test_slice_count_validation_and_30_slice_support (test_gaussian_09_30.GaussianTests.test_slice_count_validation_and_30_slice_support) ... ok
+test_species_mass_additivity_and_xyz_occupancy_gradients (test_gaussian_09_30.GaussianTests.test_species_mass_additivity_and_xyz_occupancy_gradients) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 6.202s
+
+OK

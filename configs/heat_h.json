@@ -1,0 +1,126 @@
+{
+  "script": "scripts/eat_genetic_scripts/eat_genetic_08.27.26_H_sublattice.py",
+  "config": {
+    "paths": {
+      "output_dir": "runs/heat/h",
+      "import_structures_json": ""
+    },
+    "model": {
+      "mp_api_key": "",
+      "model_name": "uma-s-1p1",
+      "task_name": "omat",
+      "device": "cuda"
+    },
+    "crystal": {
+      "ground_truth_file": "inputs/MgB2H8/cm803019e_si_003.cif",
+      "material_id": "",
+      "material_formula": "MgB2H8",
+      "species": "Mg, B, H",
+      "variable_species": "H",
+      "supercell": "1, 1, 1",
+      "feasible_grid": "16, 16, 48",
+      "feasible_min_distance_angstrom": 1.0,
+      "initial_h_h_min_distance_angstrom": 1.0,
+      "pbc": "true, true, true"
+    },
+    "ground_truth_relaxation": {
+      "fmax": 0.05,
+      "steps": 200,
+      "maxstep": 0.1,
+      "relax_cell": true,
+      "relax_supercell": false
+    },
+    "initialization": {
+      "random_member_initialization": "discrete",
+      "discrete_count_min": 1,
+      "discrete_count_max_factor": 1.0,
+      "discrete_repair_attempts": 2000,
+      "null_density_per_angstrom3": 0.15,
+      "subcell_grid": "4, 4, 16",
+      "init_occ_total": 1.0,
+      "init_occ_noise": 0.05,
+      "init_species_dirichlet_alpha": 5.0,
+      "init_position_mode": "feasible_grid",
+      "init_position_jitter_angstrom": 0.15,
+      "keep_thresh": 0.001,
+      "seed": 76348
+    },
+    "objective": {
+      "composition_penalty": 5.0,
+      "hole_boundary_penalty": 0.0,
+      "hole_boundary_margin_angstrom": 0.0,
+      "occupancy_lower_bound_enable": false,
+      "occupancy_lower_bound_gamma": 0.7,
+      "occupancy_lower_bound_penalty": 0.05,
+      "occupancy_lower_bound_softplus_sharpness": 1.0
+    },
+    "candidate_relaxation": {
+      "enable": true,
+      "fmax": 0.05,
+      "steps": 500,
+      "maxstep_angstrom": 0.1,
+      "unconverged_penalty": 0.0
+    },
+    "syntropization": {
+      "tsallis_q": 2.0,
+      "beta0": 0.001,
+      "beta_mult": 1.5,
+      "beta_max_stages": 0,
+      "entropy_stop_avg": 0.0001,
+      "binary_stop_maxmin": 0.001,
+      "also_require_binary_stop": false
+    },
+    "minimizer": {
+      "maxit": 50,
+      "tol": 0.005,
+      "bfgs_hist": 10,
+      "max_line_search": 3
+    },
+    "history": {
+      "disable_trajectory_history": true,
+      "history_every": 1
+    },
+    "genetic": {
+      "enable": true,
+      "population_size": 30,
+      "generations": 100,
+      "elite_fraction": 0.2,
+      "crossover_fraction": 0.7,
+      "random_fraction": 0.1,
+      "parent_pool_size": 30,
+      "import_parent_count": 0,
+      "parent_a_tournament_size": 3,
+      "superposition_occ_scale": 0.5,
+      "superposition_prune_distance_angstrom": 1.0,
+      "superposition_prune_occ_thresh": 0.001,
+      "crossover_pos_sigma": 0.2,
+      "crossover_occ_sigma": 0.05,
+      "crossover_species_sigma": 0.0,
+      "live_plot_enable": true,
+      "live_plot_file": "",
+      "live_plot_metric": "score",
+      "live_plot_alpha": 0.45,
+      "live_plot_jitter": 0.16,
+      "parallel_workers": 2,
+      "parallel_gpu_ids": "0,1",
+      "execution_backend": "local",
+      "log_file": ""
+    },
+    "runtime": {
+      "terminal_verbose": true,
+      "heartbeat_interval_seconds": 100.0,
+      "running_log_file": ""
+    }
+  },
+  "repository_paths": [
+    [
+      "paths",
+      "output_dir"
+    ],
+    [
+      "crystal",
+      "ground_truth_file"
+    ]
+  ],
+  "source_record": "parameters/eat/H_sublatt/run_parameters.json"
+}

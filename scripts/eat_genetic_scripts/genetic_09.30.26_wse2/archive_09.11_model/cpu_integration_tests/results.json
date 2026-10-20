@@ -1,0 +1,135 @@
+{
+  "production_float32_raw_max_error": 1.0505318641662598e-06,
+  "production_float32_gradients_finite": true,
+  "geometry": {
+    "render_shape_zyx": [
+      30,
+      254,
+      254
+    ],
+    "measured_shape_zyx": [
+      30,
+      150,
+      150
+    ],
+    "atomic_box_lower_xyz_A": [
+      7.933328,
+      7.933328,
+      7.0
+    ],
+    "atomic_box_upper_xyz_A": [
+      30.817928000000002,
+      30.817928000000002,
+      23.0
+    ],
+    "extra_padding_xyz_A": [
+      7.933328,
+      7.933328,
+      0.0
+    ],
+    "normalization": 0.09016454655677088
+  },
+  "production_float64_raw_max_error": 7.419203890135506e-09,
+  "optional_z_padding_image_and_confinement_invariant": true,
+  "no_axial_wrap": true,
+  "gradient_checks": [
+    {
+      "variable": "positions",
+      "atom": 0,
+      "component": 0,
+      "autograd": -6.736866765634768e-05,
+      "finite_difference": -6.736797786288662e-05,
+      "absolute_error": 6.897934610658463e-10
+    },
+    {
+      "variable": "positions",
+      "atom": 0,
+      "component": 1,
+      "autograd": -2.6069765249705187e-05,
+      "finite_difference": -2.6069812975038072e-05,
+      "absolute_error": 4.772533288501684e-11
+    },
+    {
+      "variable": "positions",
+      "atom": 0,
+      "component": 2,
+      "autograd": -78.52736134165737,
+      "finite_difference": -78.52736133884264,
+      "absolute_error": 2.8147297825853457e-09
+    },
+    {
+      "variable": "positions",
+      "atom": 1,
+      "component": 0,
+      "autograd": 0.00012952818438265393,
+      "finite_difference": 0.0001295276774726517,
+      "absolute_error": 5.069100022278127e-10
+    },
+    {
+      "variable": "positions",
+      "atom": 1,
+      "component": 1,
+      "autograd": 0.4447962748605014,
+      "finite_difference": 0.44479627518967385,
+      "absolute_error": 3.2917246706176684e-10
+    },
+    {
+      "variable": "positions",
+      "atom": 1,
+      "component": 2,
+      "autograd": 81.47225541769141,
+      "finite_difference": 81.472255413928,
+      "absolute_error": 3.763418021662801e-09
+    },
+    {
+      "variable": "occupancies",
+      "atom": 0,
+      "component": 0,
+      "autograd": -0.01933756203978922,
+      "finite_difference": -0.01933756408334375,
+      "absolute_error": 2.0435545304564595e-09
+    },
+    {
+      "variable": "occupancies",
+      "atom": 0,
+      "component": 1,
+      "autograd": -0.01942355734876493,
+      "finite_difference": -0.019423559649567324,
+      "absolute_error": 2.300802392357637e-09
+    },
+    {
+      "variable": "occupancies",
+      "atom": 1,
+      "component": 0,
+      "autograd": 0.01848695879086925,
+      "finite_difference": 0.01848695916351062,
+      "absolute_error": 3.726413691507169e-10
+    },
+    {
+      "variable": "occupancies",
+      "atom": 1,
+      "component": 1,
+      "autograd": 0.018628922737725272,
+      "finite_difference": 0.018628924181030015,
+      "absolute_error": 1.4433047430817414e-09
+    }
+  ],
+  "ellipse_penalty_removed_from_actual_objective": true,
+  "vacuum_hiding_cases_rejected": 24,
+  "prefit_initial_objective": 0.5348401066246894,
+  "prefit_final_objective": 0.4062126180652785,
+  "slice_comparison_count": 30,
+  "slice_comparison_roi_matches_objective": true,
+  "checkpoint_changes_rejected": true,
+  "all_passed": true,
+  "elapsed_seconds": 26.463897228240967,
+  "device": "cpu",
+  "fairchem_evaluated": false,
+  "scope": "Production rendering, losses, prefit and serialization; no energy calculation or GA population run.",
+  "source_hashes": {
+    "genetic_09.01.26_wse2.py": "27908c2f6f4ee6ba1ca122c4836b10e9ab9af837c4ef6e38c32aa6b62e5a30f4",
+    "calibrated_image_model.py": "27cf4e1ab3eae936c965b56d05a77fc54347ef599a11dbafdd477ac6898d4edf",
+    "accepted_30_slice_model.json": "b999745b829a93acd0653ffa9f57997b7d7b5864139765ab26b428eb501cb5e9",
+    "genetic_09.01.26_wse2.yaml": "02c0afc1d7b75a0ed615178196e78fe5932045ffb95b0f3cad4bc0e62a439753"
+  }
+}

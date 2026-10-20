@@ -1,0 +1,24 @@
+{
+  "purpose": "Small CPU integration test only; zero reference offsets, synthetic TIFF, two workers, one optimizer iteration per member",
+  "status": "complete",
+  "members": 8,
+  "invalid_members": 1,
+  "member_kinds": [
+    "random_immigrant",
+    "random_immigrant",
+    "random_immigrant",
+    "random_immigrant",
+    "elite",
+    "random_immigrant",
+    "mutated_child",
+    "mutated_child"
+  ],
+  "compute_metrics": {
+    "model_energy_evaluations": 31,
+    "model_evaluation_seconds": 2.4413742357864976,
+    "objective_evaluations": 30,
+    "member_wall_seconds": 10.681839788332582
+  },
+  "production_run_launched": false,
+  "smoke_code_fingerprint": "d8912496dba7a96e0a94b832301d47bdd2fecf9d2cb18301a3b8c0964ad3acf6"
+}

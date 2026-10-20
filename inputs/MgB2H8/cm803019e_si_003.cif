@@ -1,0 +1,226 @@
+ 
+data_sad_corrected_H 
+ 
+_audit_creation_method	'manual editing, corrected positions of H-atoms'
+_publ_contact_author_name      'Yaroslav Filinchuk'
+_publ_contact_author_email      Yaroslav.Filinchuk@esrf.fr
+_publ_contact_author_phone     '33 47 688 2775'
+
+_chemical_name_systematic 
+; 
+ ? 
+; 
+_chemical_name_common             ? 
+_chemical_melting_point           ? 
+_chemical_formula_moiety          ? 
+_chemical_formula_sum 
+ 'H8 B2 Mg' 
+_chemical_formula_weight          53.994 
+ 
+loop_ 
+ _atom_type_symbol 
+ _atom_type_description 
+ _atom_type_scat_dispersion_real 
+ _atom_type_scat_dispersion_imag 
+ _atom_type_scat_source 
+ 'B'  'B'   0.0013   0.0007 
+ 'International Tables Vol C Tables 4.2.6.8 and 6.1.1.4' 
+ 'H'  'H'   0.0000   0.0000 
+ 'International Tables Vol C Tables 4.2.6.8 and 6.1.1.4' 
+ 'Mg'  'Mg'   0.0486   0.0363 
+ 'International Tables Vol C Tables 4.2.6.8 and 6.1.1.4' 
+ 
+_symmetry_cell_setting            hexagonal 
+_symmetry_space_group_name_H-M    'P 6(1)22'
+_symmetry_int_tables_number      178
+ 
+loop_ 
+ _symmetry_equiv_pos_as_xyz 
+ 'x, y, z' 
+ 'x-y, x, z+1/6' 
+ '-y, x-y, z+1/3' 
+ '-x, -y, z+1/2' 
+ '-x+y, -x, z+2/3' 
+ 'y, -x+y, z+5/6' 
+ '-y, -x, -z+5/6' 
+ 'x-y, -y, -z' 
+ 'x, x-y, -z+1/6' 
+ 'y, x, -z+1/3' 
+ '-x+y, y, -z+1/2' 
+ '-x, -x+y, -z+2/3' 
+ 
+_cell_length_a                    10.3540(12) 
+_cell_length_b                    10.3540(12) 
+_cell_length_c                    37.055(4) 
+_cell_angle_alpha                 90.00 
+_cell_angle_beta                  90.00 
+_cell_angle_gamma                 120.00 
+_cell_volume                      3440.3(7) 
+_cell_formula_units_Z             30 
+_cell_measurement_temperature     100(1) 
+_cell_measurement_reflns_used     ? 
+_cell_measurement_theta_min       ? 
+_cell_measurement_theta_max       ? 
+ 
+_exptl_crystal_description        ? 
+_exptl_crystal_colour             colourless 
+_exptl_crystal_size_max           0.05 
+_exptl_crystal_size_mid           0.03 
+_exptl_crystal_size_min           0.03 
+_exptl_crystal_density_meas       ? 
+_exptl_crystal_density_diffrn     0.782 
+_exptl_crystal_density_method     'not measured' 
+_exptl_crystal_F_000              900 
+_exptl_absorpt_coefficient_mu     0.160 
+_exptl_absorpt_correction_type    empirical 
+_exptl_absorpt_correction_T_min   ? 
+_exptl_absorpt_correction_T_max   ? 
+_exptl_absorpt_process_details    'SADABS (Sheldrick, 2005)'  
+ 
+_exptl_special_details 
+; 
+ SADABS does absorption correction and scaling of frames for the decaying 
+ intensity of the synchrotron beam at the same time.
+ The transmition factors related to absorption exclusively can not
+ be determined in this precedure.
+; 
+ 
+_diffrn_ambient_temperature       100(1) 
+_diffrn_radiation_wavelength      0.77029 
+_diffrn_radiation_type            synchrotron 
+_diffrn_radiation_source          'Beamline BM1A, SNBL, ESRF, Grenoble, France' 
+_diffrn_radiation_monochromator   'Si (111)' 
+_diffrn_measurement_device_type   'MAR345 Image plate' 
+_diffrn_measurement_method        '\f-scan' 
+_diffrn_detector_area_resol_mean  6.67 
+_diffrn_standards_number          0 
+_diffrn_standards_interval_count  0 
+_diffrn_standards_interval_time   0 
+_diffrn_reflns_number             18641 
+_diffrn_reflns_av_R_equivalents   0.0635 
+_diffrn_reflns_av_sigmaI/netI     0.0240 
+_diffrn_reflns_limit_h_min        -10 
+_diffrn_reflns_limit_h_max        10 
+_diffrn_reflns_limit_k_min        -10 
+_diffrn_reflns_limit_k_max        10 
+_diffrn_reflns_limit_l_min        -39 
+_diffrn_reflns_limit_l_max        39 
+_diffrn_reflns_theta_min          2.46 
+_diffrn_reflns_theta_max          23.97 
+_reflns_number_total              1411 
+_reflns_number_gt                 1323 
+_reflns_threshold_expression      >2sigma(I) 
+ 
+_computing_data_collection        'MAR345 control software (MAR, 2002)'
+_computing_cell_refinement        'CrysAlis (Oxford Diffraction, 2006)'
+_computing_data_reduction         'CrysAlis (Oxford Diffraction, 2006)' 
+_computing_structure_solution     'SHELXS-97 (Sheldrick, 1990)' 
+_computing_structure_refinement   'SHELXL-97 (Sheldrick, 1997)' 
+_computing_molecular_graphics     ? 
+_computing_publication_material   ? 
+ 
+_refine_special_details 
+; 
+ Refinement of F^2^ against ALL reflections.  The weighted R-factor wR and 
+ goodness of fit S are based on F^2^, conventional R-factors R are based 
+ on F, with F set to zero for negative F^2^. The threshold expression of 
+ F^2^ > 2sigma(F^2^) is used only for calculating R-factors(gt) etc. and is 
+ not relevant to the choice of reflections for refinement.  R-factors based 
+ on F^2^ are statistically about twice as large as those based on F, and R- 
+ factors based on ALL data will be even larger. 
+; 
+ 
+_refine_ls_structure_factor_coef  Fsqd  
+_refine_ls_matrix_type            full 
+_refine_ls_weighting_scheme       calc  
+_refine_ls_weighting_details 
+ 'calc w=1/[\s^2^(Fo^2^)+(0.0382P)^2^+2.9455P] where P=(Fo^2^+2Fc^2^)/3' 
+_atom_sites_solution_primary      direct 
+_atom_sites_solution_secondary    difmap 
+_atom_sites_solution_hydrogens    difmap 
+_refine_ls_hydrogen_treatment     refall 
+_refine_ls_extinction_method      none 
+_refine_ls_extinction_coef        ? 
+_refine_ls_abs_structure_details 
+ 'Flack H D (1983), Acta Cryst. A39, 876-881' 
+_refine_ls_abs_structure_Flack    -0.1(6) 
+_refine_ls_number_reflns          1411 
+_refine_ls_number_parameters      150 
+_refine_ls_number_restraints      0 
+_refine_ls_R_factor_all           0.0445 
+_refine_ls_R_factor_gt            0.0408 
+_refine_ls_wR_factor_ref          0.0952 
+_refine_ls_wR_factor_gt           0.0929 
+_refine_ls_goodness_of_fit_ref    1.180 
+_refine_ls_restrained_S_all       1.180 
+_refine_ls_shift/su_max           0.000 
+_refine_ls_shift/su_mean          0.000 
+ 
+loop_ 
+ _atom_site_label 
+ _atom_site_type_symbol 
+ _atom_site_fract_x 
+ _atom_site_fract_y 
+ _atom_site_fract_z 
+ _atom_site_U_iso_or_equiv 
+ _atom_site_adp_type 
+ _atom_site_occupancy 
+ _atom_site_symmetry_multiplicity 
+ _atom_site_calc_flag 
+ _atom_site_refinement_flags 
+ _atom_site_disorder_assembly 
+ _atom_site_disorder_group 
+Mg1 Mg 0.05477(13) 0.39068(12) 0.13510(3) 0.0212(3) Uani 1 1 d . . . 
+Mg2 Mg 0.52711(12) 0.49135(12) 0.08722(3) 0.0221(3) Uani 1 1 d . . . 
+Mg3 Mg -0.12571(15) -0.12571(15) 0.1667 0.0210(4) Uani 1 2 d S . . 
+B1 B 0.5897(7) 0.2948(4) 0.0833 0.0304(14) Uani 1 2 d S . . 
+H11 H 0.51669 0.30312 0.10686 0.070(14) Uiso 1 1 d . . . 
+H12 H 0.66937 0.41667 0.06786 0.041(11) Uiso 1 1 d . . . 
+B2 B 0.0176(7) 0.5088(3) 0.0833 0.0286(14) Uani 1 2 d S . . 
+H21 H 0.10057 0.57793 0.10983 0.036(10) Uiso 1 1 d . . . 
+H22 H -0.05784 0.37685 0.09119 0.057(12) Uiso 1 1 d . . . 
+B3 B 0.3064(5) 0.4556(5) 0.11733(11) 0.0308(10) Uani 1 1 d . . . 
+H31 H 0.27765 0.497 0.14544 0.030(9) Uiso 1 1 d . . . 
+H32 H 0.18708 0.36607 0.10071 0.033(9) Uiso 1 1 d . . . 
+H33 H 0.37014 0.38856 0.12265 0.034(10) Uiso 1 1 d . . . 
+H34 H 0.38484 0.56424 0.09767 0.043(11) Uiso 1 1 d . . . 
+B4 B -0.2785(5) -0.2992(5) 0.11965(10) 0.0261(9) Uani 1 1 d . . . 
+H41 H -0.31007 -0.21778 0.13451 0.037(10) Uiso 1 1 d . . . 
+H42 H -0.14206 -0.26276 0.12465 0.038(10) Uiso 1 1 d . . . 
+H43 H -0.34638 -0.42668 0.13306 0.009(7) Uiso 1 1 d . . . 
+H44 H -0.3142 -0.29679 0.0879 0.035(10) Uiso 1 1 d . . . 
+B5 B -0.0556(5) 0.1261(4) 0.14791(10) 0.0246(9) Uani 1 1 d . . . 
+H51 H -0.15432 0.05099 0.1728 0.038(10) Uiso 1 1 d . . . 
+H52 H -0.02584 0.04801 0.13246 0.027(9) Uiso 1 1 d . . . 
+H53 H 0.05034 0.2231 0.16413 0.021(8) Uiso 1 1 d . . . 
+H54 H -0.10453 0.18114 0.12795 0.024(9) Uiso 1 1 d . . . 
+B6 B -0.0142(5) 0.4642(5) 0.19013(11) 0.0287(10) Uani 1 1 d . . . 
+H61 H 0.1007 0.52397 0.17512 0.036(10) Uiso 1 1 d . . . 
+H62 H -0.11458 0.38763 0.1696 0.041(10) Uiso 1 1 d . . . 
+H63 H -0.04467 0.55117 0.20384 0.028(9) Uiso 1 1 d . . . 
+H64 H 0.00397 0.38618 0.21266 0.034(10) Uiso 1 1 d . . . 
+ 
+loop_ 
+ _atom_site_aniso_label 
+ _atom_site_aniso_U_11 
+ _atom_site_aniso_U_22 
+ _atom_site_aniso_U_33 
+ _atom_site_aniso_U_23 
+ _atom_site_aniso_U_13 
+ _atom_site_aniso_U_12 
+Mg1 0.0245(6) 0.0220(6) 0.0167(5) 0.0011(5) 0.0005(5) 0.0114(5) 
+Mg2 0.0235(6) 0.0218(6) 0.0188(6) -0.0031(5) 0.0003(5) 0.0096(5) 
+Mg3 0.0206(6) 0.0206(6) 0.0194(8) 0.0000(3) 0.0000(3) 0.0084(7) 
+B1 0.026(3) 0.030(3) 0.035(3) -0.006(3) 0.000 0.0128(16) 
+B2 0.031(3) 0.031(2) 0.023(3) 0.005(2) 0.000 0.0155(17) 
+B3 0.028(2) 0.043(3) 0.027(2) 0.007(2) 0.0102(19) 0.022(2) 
+B4 0.025(2) 0.028(2) 0.024(2) -0.0018(19) -0.0033(18) 0.0123(19) 
+B5 0.033(2) 0.021(2) 0.022(2) -0.0012(19) -0.0023(19) 0.015(2) 
+B6 0.030(2) 0.033(2) 0.024(2) -0.0021(19) 0.0050(19) 0.017(2) 
+ 
+_diffrn_measured_fraction_theta_max    0.998 
+_diffrn_reflns_theta_full              23.97 
+_diffrn_measured_fraction_theta_full   0.998 
+_refine_diff_density_max    0.142 
+_refine_diff_density_min   -0.169 
+_refine_diff_density_rms    0.037 

@@ -1,0 +1,9 @@
+Discrete WSe2: output=/tmp/discrete_wse2_parallel_smoke/run_rechecked, seed=123, counts=(1, 1, 2) (elite/random/crossover)
+generation=0 member=0 kind=random_immigrant score=7.9511874 atoms=2
+generation=0 member=2 kind=random_immigrant score=11.119877 atoms=3
+generation=0 member=3 kind=random_immigrant score=13.197201 atoms=5
+generation=0 member=1 kind=random_immigrant score=38.292191 atoms=4
+generation=1 member=0 kind=elite score=7.9511874 atoms=2
+generation=1 member=1 kind=random_immigrant score=2.1074311 atoms=3
+generation=1 member=3 kind=mutated_child score=1e+30 atoms=1
+generation=1 member=2 kind=mutated_child score=4.6961761 atoms=2

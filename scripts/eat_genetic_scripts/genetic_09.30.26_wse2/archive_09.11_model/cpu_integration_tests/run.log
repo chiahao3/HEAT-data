@@ -1,0 +1,8 @@
+Constructing production GA on CPU and replaying accepted calibration
+Optional z padding and nonperiodic depth response
+Production auxiliary gradients, including box forces and soft occupancies
+Vacuum hiding versus a true Se deletion, with the new slab penalty
+Actual image-prefit steps and final image serialization
+Measured-ROI slice comparisons with optional extra z padding
+Checkpoint calibration changes and old checkpoints must be rejected
+PASS: {"production_float32_raw_max_error": 1.0505318641662598e-06, "production_float32_gradients_finite": true, "production_float64_raw_max_error": 7.419203890135506e-09, "optional_z_padding_image_and_confinement_invariant": true, "no_axial_wrap": true, "ellipse_penalty_removed_from_actual_objective": true, "vacuum_hiding_cases_rejected": 24, "prefit_initial_objective": 0.5348401066246894, "prefit_final_objective": 0.4062126180652785, "slice_comparison_count": 30, "slice_comparison_roi_matches_objective": true, "checkpoint_changes_rejected": true, "all_passed": true, "elapsed_seconds": 26.463897228240967, "device": "cpu", "fairchem_evaluated": false, "scope": "Production rendering, losses, prefit and serialization; no energy calculation or GA population run."}

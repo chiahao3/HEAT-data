@@ -1,0 +1,23 @@
+{
+  "schema_version": 3,
+  "model": "double_xy_gaussian_gaussian_depth_no_envelope",
+  "sigma_z_A": 4.0,
+  "intensity_normalization": "unit_isolated_grid_aligned_W_peak",
+  "reference_peak_before_scaling": 0.010289642959833145,
+  "additional_lateral_blur_A": 0.08,
+  "target_normalization": 0.12362680584192276,
+  "kernel_peak_scale": 97.18510194217816,
+  "depth_envelope": false,
+  "target_background": 0.0,
+  "target_background_percentile": 1.0,
+  "target_normalization_percentile": 99.5,
+  "depth_response": "dz_pixel/(sqrt(2*pi)*sigma_z)*exp(-0.5*((z-z_atom)/sigma_z)**2)",
+  "depth_window_renormalization": false,
+  "voxel_size_zyx_A": [
+    1.0,
+    0.152564,
+    0.152564
+  ],
+  "element_fit_sha256": "71c069aea5e3554f510edb7c143c77272d45bdddc154baaf4f7355ad0f3c27de",
+  "position_convention": "Cell coordinates including padding; no registration offset."
+}

@@ -1,0 +1,11 @@
+{
+  "reference_source": "scripts/misc/baseline_ptycho_guided_320/objective_comparison.csv",
+  "formation_energy_per_atom_eV": -0.4223027245353805,
+  "assumed_weighted_image_penalty": 0.0,
+  "assumed_weighted_composition_penalty": 0.0,
+  "assumed_weighted_sample_box_penalty": 0.0,
+  "entropy_contribution": 0.0,
+  "ideal_total_loss": -0.4223027245353805,
+  "interpretation": "Hypothetical zero-penalty reference, not an evaluated total loss or proven lower bound.",
+  "generation_endpoint": 128
+}

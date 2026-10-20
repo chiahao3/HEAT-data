@@ -1,0 +1,86 @@
+{
+  "atomic_z_bounds_experimental_A": [
+    7.0,
+    23.0
+  ],
+  "experimental_tiff": "/data2/jt577/2026/09.2026/blob_EAT/chia-hao_data/objp_zstack_iter0001_30_slices.tif",
+  "source_shape_zyx": [
+    30,
+    578,
+    612
+  ],
+  "center_crop_origin_yx": [
+    214,
+    231
+  ],
+  "center_crop_size_source_pixels": 150,
+  "sample_shape_zyx": [
+    30,
+    150,
+    150
+  ],
+  "padded_render_shape_zyx": [
+    30,
+    254,
+    254
+  ],
+  "target_voxel_size_zyx_angstrom": [
+    1.0,
+    0.152564,
+    0.152564
+  ],
+  "sample_cell_lengths_xyz_angstrom": [
+    22.884600000000002,
+    22.884600000000002,
+    30.0
+  ],
+  "requested_vacuum_padding_each_side_xyz_angstrom": [
+    8.0,
+    8.0,
+    0.0
+  ],
+  "vacuum_padding_each_side_xyz_angstrom": [
+    7.933328,
+    7.933328,
+    0.0
+  ],
+  "vacuum_padding_slices_xyz": [
+    52,
+    52,
+    0
+  ],
+  "vacuum_padding_slices_zyx": [
+    0,
+    52,
+    52
+  ],
+  "padded_cell_lengths_xyz_angstrom": [
+    38.751256000000005,
+    38.751256000000005,
+    30.0
+  ],
+  "pbc_xyz": [
+    true,
+    true,
+    true
+  ],
+  "sample_roi_start_zyx": [
+    0,
+    52,
+    52
+  ],
+  "sample_roi_stop_zyx": [
+    30,
+    202,
+    202
+  ],
+  "image_loss_voxel_count": 675000,
+  "expected_image_loss_voxel_count": 675000,
+  "image_loss_normalization": "sum_masked_huber_divided_by_mask_voxel_count",
+  "ellipse_composition_loss": {
+    "removed": true,
+    "region_count": 0
+  },
+  "candidate_volume_excludes_vacuum": true,
+  "exact_composition_enforcement": false
+}

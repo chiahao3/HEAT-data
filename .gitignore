@@ -1,0 +1,10 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.env.*
+runs/
+*.blend
+*.blend[0-9]*
+slurm-*.out

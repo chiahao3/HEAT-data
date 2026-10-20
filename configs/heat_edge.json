@@ -1,0 +1,117 @@
+{
+  "script": "scripts/eat_genetic_scripts/eat_genetic_08.27.26_disloc.py",
+  "config": {
+    "paths": {
+      "output_dir": "runs/heat/edge",
+      "nist_dump_dir": "inputs/NIST_dump_files",
+      "import_structures_json": ""
+    },
+    "model": {
+      "mp_api_key": "",
+      "model_name": "uma-s-1p1",
+      "task_name": "omat"
+    },
+    "crystal": {
+      "defect": "edge_110",
+      "subcell_size_angstrom": 40.0,
+      "relaxable_region_size_angstrom": 25.0,
+      "vacuum_padding_angstrom": 8.0
+    },
+    "initialization": {
+      "random_member_initialization": "discrete",
+      "discrete_count_min": 1,
+      "discrete_count_max_factor": 2.0,
+      "discrete_repair_attempts": 2000,
+      "null_density_per_angstrom3": 0.15,
+      "subcell_grid": "6, 6, 6",
+      "init_occ_total": 0.2,
+      "init_occ_noise": 0.0,
+      "init_species_dirichlet_alpha": 5.0,
+      "init_position_mode": "subcell_grid",
+      "init_position_jitter_angstrom": 0.15,
+      "keep_thresh": 0.001,
+      "seed": null
+    },
+    "objective": {
+      "composition_penalty": 0.0,
+      "hole_boundary_penalty": 0.0,
+      "hole_boundary_margin_angstrom": 0.0,
+      "occupancy_lower_bound_enable": true,
+      "occupancy_lower_bound_gamma": 0.3,
+      "occupancy_lower_bound_penalty": 20.0,
+      "occupancy_lower_bound_softplus_sharpness": 0.5,
+      "reference_relax_enable": true,
+      "reference_relax_fmax": 0.05,
+      "reference_relax_steps": 500,
+      "reference_relax_maxstep_angstrom": 0.08
+    },
+    "candidate_relaxation": {
+      "enable": true,
+      "fmax": 0.05,
+      "steps": 500,
+      "maxstep_angstrom": 0.08,
+      "unconverged_penalty": 0.0
+    },
+    "syntropization": {
+      "tsallis_q": 2.0,
+      "beta0": 0.001,
+      "beta_mult": 1.5,
+      "beta_max_stages": 0,
+      "entropy_stop_avg": 0.0001,
+      "binary_stop_maxmin": 0.001,
+      "also_require_binary_stop": false
+    },
+    "minimizer": {
+      "maxit": 100,
+      "tol": 0.005,
+      "bfgs_hist": 10,
+      "max_line_search": 3
+    },
+    "history": {
+      "disable_trajectory_history": true,
+      "history_every": 1
+    },
+    "genetic": {
+      "enable": true,
+      "population_size": 30,
+      "generations": 100,
+      "elite_fraction": 0.1,
+      "crossover_fraction": 0.65,
+      "random_fraction": 0.25,
+      "parent_pool_size": 30,
+      "import_parent_count": 0,
+      "parent_a_tournament_size": 2,
+      "superposition_occ_scale": 0.5,
+      "superposition_prune_distance_angstrom": 1.0,
+      "superposition_prune_occ_thresh": 0.001,
+      "crossover_pos_sigma": 0.3,
+      "crossover_occ_sigma": 0.05,
+      "crossover_species_sigma": 0.0,
+      "live_plot_enable": true,
+      "live_plot_file": "",
+      "live_plot_metric": "score",
+      "live_plot_alpha": 0.45,
+      "live_plot_jitter": 0.16,
+      "parallel_workers": 2,
+      "parallel_gpu_ids": "0,1",
+      "execution_backend": "local",
+      "log_file": ""
+    },
+    "runtime": {
+      "terminal_verbose": false,
+      "heartbeat_interval_seconds": 60.0,
+      "running_log_file": ""
+    }
+  },
+  "repository_paths": [
+    [
+      "paths",
+      "output_dir"
+    ],
+    [
+      "paths",
+      "nist_dump_dir"
+    ]
+  ],
+  "source_record": "parameters/eat/edge/run_parameters.json"
+}

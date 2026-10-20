@@ -1,0 +1,17 @@
+{
+  "reference_run": "/data2/jt577/2026/09.2026/blob_EAT/09.30/runs_12_slice_discrete_320_imagepenalty=10",
+  "files_sha256": {
+    "source/discrete_09.30.26_wse2.py": "245c1dcd9899aa66e7f1d7d555797b40da7a1e06797ba04f3a64d22149acc6c7",
+    "source/position_minimizer.py": "f2f5cb8d94d061771151bd8b8644a0d33d0231f256fb5dda57e970e70b66e498",
+    "source/discrete_09.30.26_wse2.yaml": "7e126106cbda59a13104968d7eacb40663363af98f0e8129a504322fb271825e",
+    "source/gaussian_image_model.py": "65b1213aff66f556e1eebab5607b2defa01a70801d8eea003d206c6854cf55bb",
+    "source/wse2_image_geometry.py": "d590c316ac89a43ac88ec771e78933aba9f83590703cc0b0ae52c82b3371c927",
+    "inputs/element_double_gaussian_fits.csv": "71c069aea5e3554f510edb7c143c77272d45bdddc154baaf4f7355ad0f3c27de",
+    "inputs/ordinary_run_parameters.json": "6adfbc248e1b0c613c13fc20955b69afc66de6ec22d4d63f39bc79ce491d6996",
+    "inputs/materials_project_selected_record.json": "36e05da9505c65d7c2592c06cf743e8ef49447846067b05326878e0c7f457d51",
+    "inputs/ordinary_best_structure.json": "aaac3bdf7a406106aa355b04f5e7ddcf3a4a51a969e7cf7a3827d57e075ea648",
+    "inputs/reference_energies.json": "5c5445a66a529257dab3b312b2c00740fcd15d4e6d44bab1d8960ca7272cf859",
+    "inputs/previous_energy_only_relaxed.extxyz": "793514328b594f61259537564a15aa62d6e4494f7115b99f7b192dd43c8fda1b",
+    "inputs/experimental.tif": "3e70a534efb1770007528792f08dc212cfdac96da38418a7e757fa52d6401785"
+  }
+}

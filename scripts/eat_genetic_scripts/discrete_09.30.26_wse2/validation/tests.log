@@ -1,0 +1,40 @@
+test_box_gradient_sign (test_discrete_wse2.DiscreteTests.test_box_gradient_sign) ... ok
+test_config_validation (test_discrete_wse2.DiscreteTests.test_config_validation) ... ok
+test_crossover_sides_and_species (test_discrete_wse2.DiscreteTests.test_crossover_sides_and_species) ... ok
+test_end_to_end_and_resume (test_discrete_wse2.DiscreteTests.test_end_to_end_and_resume) ... Discrete WSe2: output=/tmp/tmp_0fcd2z1/run, seed=123, counts=(1, 1, 2) (elite/random/crossover)
+generation=0 member=0 kind=random_immigrant score=3.3150748 atoms=4
+generation=0 member=1 kind=random_immigrant score=2.255392 atoms=9
+generation=0 member=2 kind=random_immigrant score=2.1725083 atoms=2
+generation=0 member=3 kind=random_immigrant score=1.2452821 atoms=6
+generation=1 member=0 kind=elite score=1.2452821 atoms=6
+generation=1 member=1 kind=random_immigrant score=1.7829852 atoms=5
+generation=1 member=2 kind=crossover_child score=1.1533556 atoms=6
+generation=1 member=3 kind=crossover_child score=1.1535283 atoms=6
+Discrete WSe2: output=/tmp/tmp_0fcd2z1/run, seed=123, counts=(1, 1, 2) (elite/random/crossover)
+Discrete WSe2: output=/tmp/tmp_0fcd2z1/run, seed=123, counts=(1, 1, 2) (elite/random/crossover)
+generation=2 member=0 kind=elite score=1.1533556 atoms=6
+generation=2 member=1 kind=random_immigrant score=2.0172599 atoms=6
+generation=2 member=2 kind=crossover_child score=1.1015301 atoms=6
+generation=2 member=3 kind=crossover_child score=1.1526669 atoms=6
+ok
+test_generations_selection_and_elites (test_discrete_wse2.DiscreteTests.test_generations_selection_and_elites) ... ok
+test_import_top_n_no_dedup (test_discrete_wse2.DiscreteTests.test_import_top_n_no_dedup) ... ok
+test_inapplicable_mutation_recorded (test_discrete_wse2.DiscreteTests.test_inapplicable_mutation_recorded) ... ok
+test_invalid_disconnected_member_does_not_abort (test_discrete_wse2.DiscreteTests.test_invalid_disconnected_member_does_not_abort) ... ok
+test_member_progress_restarts_with_saved_compute (test_discrete_wse2.DiscreteTests.test_member_progress_restarts_with_saved_compute) ... ok
+test_mutation_operators_and_probability (test_discrete_wse2.DiscreteTests.test_mutation_operators_and_probability) ... ok
+test_objective_and_finite_difference_gradient (test_discrete_wse2.DiscreteTests.test_objective_and_finite_difference_gradient) ... ok
+test_preprocessing_roi_and_normalization (test_discrete_wse2.DiscreteTests.test_preprocessing_roi_and_normalization) ... ok
+test_random_is_hard_and_reproducible (test_discrete_wse2.DiscreteTests.test_random_is_hard_and_reproducible) ... ok
+test_relaxation_preserves_atoms_and_improves (test_discrete_wse2.DiscreteTests.test_relaxation_preserves_atoms_and_improves) ... ok
+test_yaml_api_key_and_setup_retry (test_discrete_wse2.DiscreteTests.test_yaml_api_key_and_setup_retry) ... Discrete WSe2: output=/tmp/tmp_0fcd2z1/setup_retry, seed=123, counts=(5, 13, 32) (elite/random/crossover)
+/usr/lib/python3.12/traceback.py:241: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp_0fcd2z1/setup_retry/.driver.lock' mode='w' encoding='UTF-8'>
+  tb.tb_frame.clear()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+Discrete WSe2: output=/tmp/tmp_0fcd2z1/setup_retry, seed=123, counts=(5, 13, 32) (elite/random/crossover)
+ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 2.447s
+
+OK

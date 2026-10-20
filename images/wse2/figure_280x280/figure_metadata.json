@@ -1,0 +1,162 @@
+{
+  "paper_dir": "/Users/justint/Library/Mobile Documents/com~apple~CloudDocs/Desktop/Arias Research/EAT/2026/paper_genetic_EAT_fixed_scaffold_2026",
+  "output_dir": "/Users/justint/Library/Mobile Documents/com~apple~CloudDocs/Desktop/Arias Research/EAT/2026/paper_genetic_EAT_fixed_scaffold_2026/images/wse2/figure_280x280",
+  "sources": {
+    "experimental": {
+      "source": "xsfs/wse2/xsfs_wse2_EAT/images/experimental_zsum_cropped_280x280.tif",
+      "sha256": "909b92e1e1844e507bb68f8b1a9b8df84f5b7f1352b82484b295af34db3d8ab8",
+      "shape": [
+        280,
+        280
+      ]
+    },
+    "heat_reconstructed": {
+      "source": "xsfs/wse2/xsfs_wse2_EAT/images/reconstructed_zsum_cropped_280x280.tif",
+      "sha256": "7d83030cc6b08e7b67325752c39bad0d6750c346ff9c2e92476b7736303ed4e4",
+      "shape": [
+        280,
+        280
+      ]
+    },
+    "ordinary_reconstructed": {
+      "source": "xsfs/wse2/xsfs_wse2_ordinary/images/generation_0126_reconstructed_zsum_cropped_280x280.tif",
+      "sha256": "894d118d635b108c3bf786a5d0dd7c6e368a788ff43a4f5562b30ae59e2901c3",
+      "shape": [
+        280,
+        280
+      ],
+      "generation": 126,
+      "member_index": 30
+    }
+  },
+  "experimental_tiff": "inputs/ptycho_data/objp_zstack_iter0200.tif",
+  "original_tiff_roi_zyx": [
+    [
+      0,
+      12
+    ],
+    [
+      149,
+      429
+    ],
+    [
+      166,
+      446
+    ]
+  ],
+  "voxel_size_zyx_A": [
+    1.0,
+    0.152564,
+    0.152564
+  ],
+  "lateral_size_A": [
+    42.71792000000001,
+    42.71792000000001
+  ],
+  "measured_z_size_A": 12.0,
+  "normalized_isovalue": 0.2,
+  "raw_isovalue": 0.024725361168384554,
+  "normalization": {
+    "schema_version": 3,
+    "model": "double_xy_gaussian_gaussian_depth_no_envelope",
+    "sigma_z_A": 4.0,
+    "intensity_normalization": "unit_isolated_grid_aligned_W_peak",
+    "reference_peak_before_scaling": 0.010289642959833145,
+    "additional_lateral_blur_A": 0.08,
+    "target_normalization": 0.12362680584192276,
+    "kernel_peak_scale": 97.18510194217816,
+    "depth_envelope": false,
+    "target_background": 0.0,
+    "target_background_percentile": 1.0,
+    "target_normalization_percentile": 99.5,
+    "depth_response": "dz_pixel/(sqrt(2*pi)*sigma_z)*exp(-0.5*((z-z_atom)/sigma_z)**2)",
+    "depth_window_renormalization": false,
+    "voxel_size_zyx_A": [
+      1.0,
+      0.152564,
+      0.152564
+    ],
+    "element_fit_sha256": "71c069aea5e3554f510edb7c143c77272d45bdddc154baaf4f7355ad0f3c27de",
+    "position_convention": "Cell coordinates including padding; no registration offset."
+  },
+  "intensity_scale": [
+    -0.000406916078645736,
+    1.9617524147033691
+  ],
+  "image_orientation": "Original TIFF/PNG: x right, y down. Pixel samples at i*spacing.",
+  "field_policy": "Direct measured voxels, one global threshold, no Gaussian fitting, no spatial smoothing, no component filtering, no depth exaggeration.",
+  "field_boundary_policy": "Outside measured support is zero for meshing; surfaces are clipped at the measured sample bounds. Boundary caps are display closures, not inferred experimental depth structure.",
+  "gen0_xsf": "images/wse2/figure_280x280/generation_0000_best_loss_cropped_280x280.xsf",
+  "final_xsf": "xsfs/wse2/xsfs_wse2_EAT/best_cropped_280x280.xsf",
+  "gen0_atoms": 898,
+  "gen0_species": {
+    "Se": 605,
+    "W": 293
+  },
+  "final_atoms": 1150,
+  "final_species": {
+    "Se": 761,
+    "W": 389
+  },
+  "final_generation": 115,
+  "final_member": 31,
+  "crop_geometry": {
+    "file": "best_cropped_280x280.xsf",
+    "xy_pixels": [
+      280,
+      280
+    ],
+    "original_cell_xy_bounds_A": [
+      [
+        10.984608000000001,
+        10.984608000000001
+      ],
+      [
+        53.70252800000001,
+        53.70252800000001
+      ]
+    ],
+    "xy_material_lengths_A": [
+      42.71792000000001,
+      42.71792000000001
+    ],
+    "retained_atoms": 1150,
+    "removed_atoms": 347,
+    "species_counts": {
+      "Se": 761,
+      "W": 389
+    },
+    "coordinate_shift_xyz_A": [
+      -3.05128,
+      -3.05128,
+      0.0
+    ],
+    "cell_lengths_A": [
+      58.584576,
+      58.584576,
+      28.0
+    ],
+    "vacuum_each_side_xyz_A": [
+      7.933328,
+      7.933328,
+      8.0
+    ],
+    "z_policy": "All original atom z coordinates and the original padded z cell are retained."
+  },
+  "camera": {
+    "horizontal_span_A": 48.0,
+    "vertical_span_A": 18.0,
+    "center_experimental_xyz_A": [
+      21.358960000000003,
+      21.358960000000003,
+      6.0
+    ],
+    "direction": "+y",
+    "image_size": [
+      3200,
+      1200
+    ]
+  },
+  "ordinary_display_generation": 126,
+  "heat_display_generation": 126
+}
