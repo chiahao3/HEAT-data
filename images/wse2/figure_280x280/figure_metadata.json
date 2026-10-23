@@ -19,17 +19,17 @@
       ]
     },
     "ordinary_reconstructed": {
-      "source": "xsfs/wse2/xsfs_wse2_ordinary/images/generation_0126_reconstructed_zsum_cropped_280x280.tif",
-      "sha256": "894d118d635b108c3bf786a5d0dd7c6e368a788ff43a4f5562b30ae59e2901c3",
+      "source": "xsfs/wse2/xsfs_wse2_ordinary/images/generation_0446_reconstructed_zsum_cropped_280x280.tif",
+      "sha256": "ac716c1c269dc54d704e5bfb1ee8138123afc4780a4efc6cb819edcd6c0df576",
       "shape": [
         280,
         280
       ],
-      "generation": 126,
-      "member_index": 30
+      "generation": 446,
+      "member_index": 0
     }
   },
-  "experimental_tiff": "inputs/ptycho_data/objp_zstack_iter0200.tif",
+  "experimental_tiff": "ptycho_data/objp_zstack_iter0200.tif",
   "original_tiff_roi_zyx": [
     [
       0,
@@ -157,6 +157,6 @@
       1200
     ]
   },
-  "ordinary_display_generation": 126,
+  "ordinary_display_generation": 446,
   "heat_display_generation": 126
 }

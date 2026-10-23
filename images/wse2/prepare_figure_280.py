@@ -1,8 +1,8 @@
-"""Prepare calibrated WSe2 projection panels and cropped structures.
+"""Prepare calibrated WSe2 panels and inputs for render_figure.py.
 
 Run with the usual Python (NumPy, Pillow, Matplotlib). No ASE/TIFF package is
-needed. Original TIFFs, PNGs and XSFs are read only.
-All paths resolve relative to this paper directory.
+needed. Original TIFFs, PNGs and XSFs are read only. Then run the Blender driver
+printed at the end. All paths resolve relative to this paper directory.
 """
 from pathlib import Path
 import json
@@ -25,7 +25,7 @@ FIELD_ISOVALUE = 0.20  # (raw phase - saved background) / saved normalization
 PAPER = Path(__file__).resolve().parents[2]
 HEAT = PAPER / 'xsfs/wse2/xsfs_wse2_EAT'
 ORDINARY = PAPER / 'xsfs/wse2/xsfs_wse2_ordinary'
-TIFF = PAPER / 'inputs/ptycho_data/objp_zstack_iter0200.tif'
+TIFF = PAPER / 'ptycho_data/objp_zstack_iter0200.tif'
 
 
 def read_tiff(path):
@@ -164,6 +164,7 @@ def main():
     print(f'Prepared {OUTPUT_DIR}')
     print(f'Generation 0 crop: {len(symbols)} atoms; final crop: {len(final_symbols)} atoms.')
     print('Verified TIFF projection, shared display scale, and final XSF crop.')
+    print('Next: Blender --background --factory-startup --python scripts/blender/wse2/render_figure.py')
 
 
 if __name__ == '__main__':

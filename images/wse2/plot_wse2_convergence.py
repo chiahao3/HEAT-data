@@ -6,12 +6,14 @@ Edit USER PARAMETERS below, then run:
 Both member_metrics.csv and generation_metrics.csv are supported. Total loss
 is cumulative best-so-far. Formation energy and the weighted image penalty
 belong to that same best-loss candidate; these components need not decrease
-monotonically. Both curves stop at the last generation available in both
-runs. No reference energy is subtracted.
+monotonically. HEAT stops at generation 128; the conventional curve includes
+all complete generations. No reference energy is subtracted.
+Use --loss-only to regenerate only the total-loss figure.
 """
 
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 from dataclasses import dataclass
@@ -35,10 +37,10 @@ OUTPUT_DIR = BASE_DIR
 ENERGY_REFERENCE_CSV = BASE_DIR.parents[1] / "scripts/misc/baseline_ptycho_guided_320/objective_comparison.csv"
 TOTAL_LOSS_REFERENCE_JSON = BASE_DIR.parents[1] / "scripts/misc/baseline_ptycho_guided_320/run_summary.json"
 
-# Generation zero is the initial population. Set an integer to cap both
-# curves at that generation, inclusive; both always stop at the earlier run's
-# last available generation. None applies no additional cap.
+# Generation zero is the initial population. Optional shared input cap;
+# otherwise each method retains its own endpoint.
 MAX_GENERATION_OVERRIDE = None
+HEAT_FINAL_GENERATION = 128
 INCLUDE_PARTIAL_GENERATIONS = False
 # Used to identify complete generations when reading member_metrics.csv.
 POPULATION_SIZE = 50
@@ -153,7 +155,7 @@ def style_axis(axis):
 
 
 def load_energy_reference():
-    """Energy-only structure, re-evaluated in the bundled guided-reference run."""
+    """Read the recorded energy-only reference from the bundled results."""
     with ENERGY_REFERENCE_CSV.open(newline="") as handle:
         rows = [row for row in csv.DictReader(handle)
                 if row["structure"] == "previous_energy_only_relaxed"]
@@ -162,7 +164,7 @@ def load_energy_reference():
     return float(rows[0]["formation_energy_per_atom"])
 
 
-def plot_metric(heat, ordinary, attribute, ylabel, y_limits, output_path, *, ideal_reference=False):
+def plot_metric(heat, ordinary, attribute, ylabel, y_limits, output_path, *, ideal_reference=False, endpoint_markers=False):
     """Match the H-sublattice figure style, drawing HEAT over Ordinary."""
     fig, axis = plt.subplots(figsize=FIGURE_SIZE, constrained_layout=True)
     # Draw Ordinary first and give HEAT higher z-order wherever they overlap.
@@ -176,6 +178,11 @@ def plot_metric(heat, ordinary, attribute, ylabel, y_limits, output_path, *, ide
         [getattr(candidate, attribute) for candidate in heat],
         color=HEAT_COLOR, linewidth=BEST_LINE_WIDTH, label="HEAT", zorder=3,
     )
+    if endpoint_markers:
+        for candidates, color in ((ordinary, ORDINARY_COLOR), (heat, HEAT_COLOR)):
+            end = candidates[-1]
+            axis.plot(end.generation, getattr(end, attribute), marker="o",
+                      markersize=6.5, color=color, linestyle="none", zorder=5)
     legend_handles = [heat_line, ordinary_line]
     if attribute == "score" and not ideal_reference:
         reference = json.loads(TOTAL_LOSS_REFERENCE_JSON.read_text())
@@ -203,9 +210,14 @@ def plot_metric(heat, ordinary, attribute, ylabel, y_limits, output_path, *, ide
     axis.set_ylim(bottom=y_limits[0], top=y_limits[1])
     first = min(heat[0].generation, ordinary[0].generation)
     last = max(heat[-1].generation, ordinary[-1].generation)
-    axis.set_xlim(first - 0.7, last + 0.7)
-    first_tick = int(np.ceil(first / GENERATION_TICK_STEP)) * GENERATION_TICK_STEP
-    axis.set_xticks(np.arange(first_tick, last + 1, GENERATION_TICK_STEP))
+    margin = max(0.7, 0.018 * (last - first)) if endpoint_markers else 0.7
+    axis.set_xlim(first - margin, last + margin)
+    tick_step = GENERATION_TICK_STEP
+    if (last - first) / tick_step > 8:
+        tick_step = next(step for step in (50, 100, 200, 500, 1000, 2000, 5000)
+                         if (last - first) / step <= 6)
+    first_tick = int(np.ceil(first / tick_step)) * tick_step
+    axis.set_xticks(np.arange(first_tick, last + 1, tick_step))
     style_axis(axis)
     if ideal_reference:
         axis.legend(handles=legend_handles, frameon=False, fontsize=12,
@@ -218,14 +230,15 @@ def plot_metric(heat, ordinary, attribute, ylabel, y_limits, output_path, *, ide
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--loss-only", action="store_true")
+    args = parser.parse_args()
     heat = best_candidates_so_far(load_results(HEAT_CSV))
     ordinary = best_candidates_so_far(load_results(ORDINARY_CSV))
-    horizon = min(heat[-1].generation, ordinary[-1].generation)
-    heat = [candidate for candidate in heat if candidate.generation <= horizon]
-    ordinary = [candidate for candidate in ordinary if candidate.generation <= horizon]
-    print(f"[common generation endpoint] {horizon}")
+    heat = [candidate for candidate in heat if candidate.generation <= HEAT_FINAL_GENERATION]
+    print(f"[generation endpoints] HEAT={heat[-1].generation}, Conventional={ordinary[-1].generation}")
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    for label, path, candidates in (("HEAT", HEAT_CSV, heat), ("Ordinary", ORDINARY_CSV, ordinary)):
+    for label, path, candidates in (("HEAT", HEAT_CSV, heat), ("Conventional", ORDINARY_CSV, ordinary)):
         print(f"[{label} source] {Path(path).expanduser().resolve()}")
         print(
             f"[{label}] generations={candidates[0].generation}-{candidates[-1].generation} "
@@ -233,13 +246,16 @@ def main():
             f"formation_energy={candidates[-1].formation_energy:.12f} "
             f"weighted_image_penalty={candidates[-1].image_penalty:.12f}"
         )
-    # All three plots use the same common generation endpoint.
+    # Each curve ends at its own final generation.
     for attribute, ylabel, limits, filename in (
         ("score", "Loss", (LOSS_Y_MIN, LOSS_Y_MAX), "wse2_total_loss_convergence.png"),
         ("formation_energy", r"$E_{\rm f}$ (eV/atom)", (ENERGY_Y_MIN, ENERGY_Y_MAX), "wse2_formation_energy_convergence.png"),
         ("image_penalty", "Ptycho image penalty", (IMAGE_Y_MIN, IMAGE_Y_MAX), "wse2_image_penalty_convergence.png"),
     ):
-        plot_metric(heat, ordinary, attribute, ylabel, limits, OUTPUT_DIR / filename)
+        if args.loss_only and attribute != "score":
+            continue
+        plot_metric(heat, ordinary, attribute, ylabel, limits, OUTPUT_DIR / filename,
+                    endpoint_markers=(attribute == "score"))
 
 
 if __name__ == "__main__":

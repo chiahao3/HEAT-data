@@ -1,4 +1,4 @@
-"""Score the ptychography-guided reference with the original image model.
+"""Score the relaxed ideal-bilayer reference with the original image model.
 
 Uses saved coordinates without registration, rotation, gain fitting, or further
 relaxation. Validates the renderer against the logged HEAT image penalty.
@@ -16,8 +16,7 @@ from render_generation128 import load_module
 
 BASE = Path(__file__).resolve().parent
 PAPER = BASE.parents[1]
-REFERENCE = PAPER / 'scripts/misc/baseline_ptycho_guided_320'
-OUTPUT = REFERENCE / 'image_model_verification'
+REFERENCE = PAPER / 'scripts/misc/baseline_ideal_twisted_bilayer_3deg_320/relaxed_free_edges'
 
 
 def main():
@@ -49,7 +48,7 @@ def main():
     assert np.isclose(model.gain, norm['kernel_peak_scale'], rtol=1e-5)
     start = np.rint(padding[::-1] / voxel).astype(int)
     roi = tuple(slice(int(a), int(a+b)) for a, b in zip(start, [12, 320, 320]))
-    experimental_path = PAPER / 'inputs/ptycho_data/objp_zstack_iter0200.tif'
+    experimental_path = PAPER / 'ptycho_data/objp_zstack_iter0200.tif'
     experimental = helpers.read_tiff(experimental_path)[:12, 129:449, 146:466]
     target = np.maximum(experimental - norm['target_background'], 0) / norm['target_normalization']
     parameters = json.loads((PAPER / 'parameters/eat/wse2/run_parameters.json').read_text())['resolved_parameters']
@@ -92,12 +91,9 @@ def main():
     np.testing.assert_allclose(check['weighted_image_penalty'], float(best['image_term']), rtol=1e-4)
     np.testing.assert_allclose(check['weighted_sample_box_penalty'], float(best['sample_box_term']), rtol=1e-4, atol=1e-7)
     np.testing.assert_allclose(check['weighted_composition_penalty'], float(best['composition_penalty']), rtol=1e-4, atol=1e-7)
-    source = REFERENCE / 'final_guided_relaxed.xsf'
+    source = REFERENCE / 'final_relaxed.xsf'
     result, predicted = evaluate(source)
-    with (REFERENCE / 'objective_comparison.csv').open(newline='') as handle:
-        reference_row = next(row for row in csv.DictReader(handle)
-                             if row['structure'] == 'final_guided_relaxed')
-    result['formation_energy_per_atom_eV'] = float(reference_row['formation_energy_per_atom'])
+    result['formation_energy_per_atom_eV'] = json.loads((REFERENCE / 'relaxation_results.json').read_text())['final']['formation_energy_per_atom_eV']
     result['total_loss'] = sum(result[k] for k in ['formation_energy_per_atom_eV',
         'weighted_image_penalty', 'weighted_composition_penalty', 'weighted_sample_box_penalty'])
     result.update(source_xsf=str(source.relative_to(PAPER)),
@@ -108,10 +104,9 @@ def main():
         comparison_shape_zyx=[12,320,320], registration='none; saved coordinates used directly',
         validation_heat_image_term=check['weighted_image_penalty'],
         validation_heat_logged_image_term=float(best['image_term']))
-    OUTPUT.mkdir(parents=True, exist_ok=True)
-    (OUTPUT / 'image_penalty_results.json').write_text(json.dumps(result, indent=2)+'\n')
+    (REFERENCE / 'image_penalty_results.json').write_text(json.dumps(result, indent=2)+'\n')
     frames = [Image.fromarray(layer.astype(np.float32)) for layer in predicted]
-    frames[0].save(OUTPUT / 'predicted_normalized_phase_320x320.tif', save_all=True, append_images=frames[1:])
+    frames[0].save(REFERENCE / 'predicted_normalized_phase_320x320.tif', save_all=True, append_images=frames[1:])
     print(json.dumps({k: result[k] for k in ['atom_count', 'raw_huber_image_loss',
         'weighted_image_penalty', 'volume_pearson_correlation', 'cropped_projection_pearson_correlation',
         'validation_heat_image_term', 'validation_heat_logged_image_term',

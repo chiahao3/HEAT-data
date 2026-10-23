@@ -46,7 +46,7 @@ def main():
                     'total_integrated_weight': float(row['total_integrated_weight_VAngstrom3']),
                 }
     torch.set_num_threads(4)
-    experimental = helpers.read_tiff(PAPER / 'inputs/ptycho_data/objp_zstack_iter0200.tif')[:12, 129:449, 146:466]
+    experimental = helpers.read_tiff(PAPER / 'ptycho_data/objp_zstack_iter0200.tif')[:12, 129:449, 146:466]
     target_projection = experimental.sum(axis=0)[20:-20, 20:-20]
     curves, records = {}, []
     for name, directory in [('HEAT', 'xsfs_wse2_EAT'), ('Conventional', 'xsfs_wse2_ordinary')]:

@@ -84,7 +84,7 @@ def main():
     Image.fromarray(rgba).save(TARGET.with_suffix('.png'))
     helpers['save_projection'](raw, 'ordinary_reconstructed_zsum_280x280', voxel[2], scale)
 
-    exp = helpers['read_tiff'](PAPER/'inputs/ptycho_data/objp_zstack_iter0200.tif')
+    exp = helpers['read_tiff'](PAPER/'ptycho_data/objp_zstack_iter0200.tif')
     exp = exp[:12,129:449,146:466]
     exp_norm = np.maximum(exp-norm['target_background'],0)/norm['target_normalization']
     residual = np.abs(predicted-exp_norm)

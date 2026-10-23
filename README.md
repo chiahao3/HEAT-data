@@ -21,11 +21,32 @@ not a multi-seed scaling study.
 | `scripts/ordinary_genetic_scripts/` | Conventional H-sublattice and dislocation GAs |
 | `scripts/misc/baseline_ptycho_guided_320/` | WSe2 reference construction, source snapshot, inputs, relaxed structures, and scores |
 | `images/` | Convergence scripts, logs/metrics, and existing figure images |
-| `xsfs/` | Saved structures and structure-conversion helpers |
+| `images/wse2/gaussian_splats/` | Additional trial structure, cropped XSF, simulated phase images, and rendering metadata |
 
 `eat`/`GEAT` in historical filenames denotes HEAT; `ordinary` denotes the
-conventional GA. Blender scenes, backup files, and Blender rendering scripts
-are excluded. Existing scientific figure images are retained.
+conventional GA. Blender scenes and backup files are excluded. Some historical
+rendering scripts and existing scientific figure images are retained; the shared
+Blender utilities needed to rerun those scripts are not included.
+
+## Updated WSe2 comparison
+
+The conventional-GA metrics now extend through generation **446**, while the
+HEAT comparison ends at generation **128**. The total-loss plot shows each run
+only through its own endpoint, marked by a filled circle. HEAT used 543,767
+interatomic-model evaluations through generation 128; the conventional GA used
+682,069 through generation 446, approximately 25% more. These are evaluation
+counts, not elapsed-time ratios.
+
+The final best losses are approximately -0.3513 for HEAT and 0.01993 for the
+conventional GA. The conventional projection in `images/wse2/figure_280x280/`
+has been updated to generation 446; its rendering metadata is stored alongside
+it in `ordinary_generation446_render_metadata.json`.
+
+The previous `xsfs/` directory and structure-conversion helper have been removed
+from this version. The recorded convergence metrics, input structures, guided
+WSe2 reference, and additional trial XSF in `gaussian_splats/` remain included.
+Scripts that require the removed per-generation XSF exports or export manifests
+cannot currently reproduce those structural images from this checkout alone.
 
 ## Reproduce convergence plots
 
@@ -57,9 +78,16 @@ penalty curves. The references are read from included results:
   helper uses this energy with hypothetical zero penalties, not the measured
   image penalty.
 
-`images/wse2/plot_wse2_pearson_convergence.py` computes projection correlations
-from the saved structures and experimental image. It additionally requires
-PyTorch and Pillow. The double-Gaussian fit table is
+To regenerate only the updated total-loss plot, use
+`python3 images/wse2/plot_wse2_convergence.py --loss-only`.
+
+`images/wse2/plot_wse2_pearson_convergence.py` and the structural-image rendering
+helpers require the removed `xsfs/` exports and manifests, in addition to PyTorch
+and Pillow. They are retained as workflow records, not standalone reproduction
+commands for this version. Some also retain historical input paths, including
+`ptycho_data/`; the bundled experimental TIFF is under `inputs/ptycho_data/`.
+`evaluate_reference_image.py` additionally refers to a historical energy-only
+reference folder that is not bundled. The double-Gaussian fit table is
 `scripts/eat_genetic_scripts/genetic_09.30.26_wse2/element_double_gaussian_fits.csv`.
 
 ## Run new searches
@@ -152,9 +180,10 @@ microscope diffraction data, or pretrained model weights.
   The recorded environment currently covers the guided WSe2 reference.
 - Validate full searches in a clean GPU environment. Input-path checks and
   plot reproduction do not establish that every search dependency is installed.
-- For the manuscript release, publish the repository and archive a specific
-  version with a persistent identifier, then use that version in the availability
-  statements.
+- Restore or separately archive the per-generation structure exports and their
+  manifests if structural-image and Pearson-curve reproduction is required.
+- Archive a specific version of this public repository with a persistent
+  identifier, then use that version in the manuscript availability statements.
 
 No repository-wide redistribution license has been selected yet. Third-party
 data, model weights, and dependency code retain their respective terms and

@@ -60,7 +60,7 @@ def main():
                     'total_integrated_weight': float(row['total_integrated_weight_VAngstrom3']),
                 }
     torch.set_num_threads(4)
-    experimental = helpers.read_tiff(PAPER / 'inputs/ptycho_data/objp_zstack_iter0200.tif')[:12, 129:449, 146:466]
+    experimental = helpers.read_tiff(PAPER / 'ptycho_data/objp_zstack_iter0200.tif')[:12, 129:449, 146:466]
     metadata = {'display_generation': GENERATION, 'renderer': str(model_path.relative_to(PAPER)), 'methods': {}}
     shared_norm = shared_scale = None
 

@@ -1,0 +1,21 @@
+{
+  "generation": 446,
+  "member_index": 0,
+  "source_xsf": "xsfs/wse2/xsfs_wse2_ordinary/g0446_m0000_elite.xsf",
+  "source_xsf_sha256": "b3f70bb1a5efcaf63dfbaf4089a973d3cc7096c32a3bc0c56ed31bac32887d24",
+  "renderer": "scripts/eat_genetic_scripts/genetic_09.30.26_wse2/gaussian_image_model.py",
+  "original_export_reproduction_max_abs_error": 4.76837158203125e-07,
+  "atom_count": 1293,
+  "cropped_atom_count": 980,
+  "score": 0.019933001615415072,
+  "formation_energy_per_atom": -0.09034419686689008,
+  "saved_weighted_image_penalty": 0.10542814433574677,
+  "rerendered_weighted_image_penalty": 0.10542862862348557,
+  "cropped_image_huber_mean": 0.010514208115637302,
+  "cropped_zsum_correlation": 0.12516119426755085,
+  "output_tiff": "xsfs/wse2/xsfs_wse2_ordinary/images/generation_0446_reconstructed_zsum_cropped_280x280.tif",
+  "display_scale": [
+    -0.000406916078645736,
+    1.9617524147033691
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "source": "rank_001_trial_0009_r0.944340.xsf",
+  "original_atom_count": 1785,
+  "cropped_atom_count": 1372,
+  "species_counts": {
+    "Se": 935,
+    "W": 437
+  },
+  "crop": {
+    "file": "best_cropped_280x280.xsf",
+    "xy_pixels": [
+      280,
+      280
+    ],
+    "original_cell_xy_bounds_A": [
+      [
+        10.984608000000001,
+        10.984608000000001
+      ],
+      [
+        53.70252800000001,
+        53.70252800000001
+      ]
+    ],
+    "xy_material_lengths_A": [
+      42.71792000000001,
+      42.71792000000001
+    ],
+    "retained_atoms": 1150,
+    "removed_atoms": 347,
+    "species_counts": {
+      "Se": 761,
+      "W": 389
+    },
+    "coordinate_shift_xyz_A": [
+      -3.05128,
+      -3.05128,
+      0.0
+    ],
+    "cell_lengths_A": [
+      58.584576,
+      58.584576,
+      28.0
+    ],
+    "vacuum_each_side_xyz_A": [
+      7.933328,
+      7.933328,
+      8.0
+    ],
+    "z_policy": "All original atom z coordinates and the original padded z cell are retained."
+  },
+  "camera": {
+    "horizontal_span_A": 48.0,
+    "vertical_span_A": 18.0,
+    "center_experimental_xyz_A": [
+      21.358960000000003,
+      21.358960000000003,
+      6.0
+    ],
+    "direction": "+y",
+    "image_size": [
+      3200,
+      1200
+    ]
+  },
+  "render_samples": 96,
+  "output_image": "rank_001_trial_0009_r0.944340_cropped_280x280_depth.png"
+}
