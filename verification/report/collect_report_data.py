@@ -114,6 +114,21 @@ for d in sorted((RES / "real_runs").glob("*_job*")):
             info["generation_metrics"] = [{k: r[k] for k in ("generation", "best_so_far_score", "best_formation_energy_per_atom",
                                                               "best_image_term", "best_atom_count", "model_energy_evaluations")}
                                           for r in csv.DictReader(fh)]
+    mem_dir = next(iter(d.rglob("members")), None)
+    if gm is None and mem_dir is not None and mem_dir.is_dir():
+        # discrete WSe2 driver: rebuild per-generation metrics from its per-member records
+        mem = [json.loads(p.read_text()) for p in sorted(mem_dir.glob("g*_m*.json"))]
+        by_g, best, rows = {}, None, []
+        for m in mem:
+            by_g.setdefault(int(m["generation"]), []).append(m)
+        for g in sorted(by_g):
+            valid = [m for m in by_g[g] if m.get("valid")]
+            gb = min(valid, key=lambda m: m["score"])
+            best = gb if best is None or gb["score"] < best["score"] else best
+            rows.append(dict(generation=g, members=len(by_g[g]), best_so_far_score=best["score"], best_formation_energy_per_atom=best["formation_energy_per_atom"],
+                             best_image_term=best["image_term"], best_atom_count=best["atom_count"],
+                             model_energy_evaluations=sum(m["compute_metrics"].get("model_energy_evaluations", 0) for m in by_g[g])))
+        info["generation_metrics"] = rows
     summ = next(iter(d.rglob("summary.json")), None)
     if summ is not None:
         info["summary"] = json.loads(summ.read_text())

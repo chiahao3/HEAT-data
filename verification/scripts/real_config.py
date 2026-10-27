@@ -3,6 +3,7 @@
 Usage: python real_config.py REPO METHOD CASE OUT_DIR GENERATIONS WORKERS GPU_IDS [--fix-yaml]
 """
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -15,6 +16,8 @@ for section, key in entry["repository_paths"]:
 cfg["paths"]["output_dir"] = str(OUT / "run")  # several drivers refuse an existing output directory
 g = cfg["genetic"]
 g["generations"] = GENS
+if os.environ.get("HEAT_POPULATION"):  # reduced population for a functional check (recorded as such in the report)
+    g.update(population_size=int(os.environ["HEAT_POPULATION"]), parent_pool_size=int(os.environ["HEAT_POPULATION"]))
 if "parallel_workers" in g:
     g.update(parallel_workers=WORKERS, parallel_gpu_ids=GPUS)
 if "runtime" in cfg and "gpu_ids" in cfg["runtime"]:

@@ -32,3 +32,11 @@ Started: 2026-10-26
 - Conventional H restarted with exact MP refs (93326).
 - Edge rerun reference (93319): Ef_ref +0.117478 eV/atom, E -7806.833657 eV vs recorded +0.117481 / -7806.832436 (1.2 meV total) -> reproduced.
 - HEAT H rerun (93325) reference with current MP refs: Ef_ref -0.236173 vs hard-coded -0.222897 (converged cell relax, 27 steps) -> current MP Mg/B/H entries give different mu than in Aug 2026; gaps at fixed H count are mu-independent, so rerun is judged by gap to its own reference. Same seed 76348 but member scores differ from archive (expected with different mu / hardware).
+- Conventional WSe2 rerun (93323, YAML fixed, production settings, gens 0-1) completed: gen-0 best loss 0.1521 with 4,635 evals vs archive gen-0 0.1569 with 4,610 -> initialization/relaxation statistically consistent.
+- Launched reduced HEAT WSe2 functional run (93327): production config except population 10, generations 2 (full run ~5 GPU-days in archive).
+- 2026-10-27 morning results:
+  - HEAT H rerun (93325, exact MP refs, seed 76348, 2 workers on 2 MIG slices): reaches its own reference at **generation 2** (best -0.236286 vs ref -0.236173; 23,826 evals) -> paper claim reproduced. Wall 2.8 h.
+  - Conventional H rerun (93326, 21 gens): no hit; best -0.224458 at gen 19-20 -> gap 0.0117 eV/atom (archive: 0.0118). Wall 8.7 h.
+  - Reduced HEAT WSe2 (93327, pop 10, 2 gens): gen-0 best 0.1253, gen-1 0.0609 (archive pop 50: 0.1087 -> 0.0565). Driver runs end-to-end incl. superposition crossover. Wall 3.5 h.
+  - HEAT edge rerun on MIG (93319): gen 0 OK (2.7 h), then **CUDA OOM on the 20 GB MIG slice** in a gen-1 crossover child (superposition doubles active sites) and the driver **deadlocked silently for 8 h**: main raised on the worker failure, `finally: stop_ga_workers` joins workers whose result-queue feeder threads block on an undrained pipe. Killing the workers surfaced the OOM traceback. => repo robustness bug (worker failure -> hang, error hidden) + memory requirement >20 GB for edge crossover.
+  - Requeued HEAT edge on a full A100 80GB (93725, gens 0-5, 2 workers on GPU 0); A100s currently all busy with other users.

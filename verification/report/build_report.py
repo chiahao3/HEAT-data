@@ -8,7 +8,7 @@ HERE = Path(__file__).resolve().parent
 D = json.loads(Path(sys.argv[1]).read_text())
 OUT = Path(sys.argv[2])
 FINAL = {"heat_h": "heat_h_job93325", "conventional_h": "conventional_h_job93326", "heat_edge": "heat_edge_job93319",
-         "conventional_wse2": "conventional_wse2_job93323"}
+         "conventional_wse2": "conventional_wse2_job93323", "heat_wse2": "heat_wse2_job93327"}
 A, RR = D["audit"], D["reruns"]
 
 
@@ -34,9 +34,10 @@ for key in ("heat_h", "conventional_h", "heat_edge"):
     c = fr[key].get("curve") or []
     h = next((p for p in c if p["gap"] < 1e-4), None)
     hit[key] = dict(hit=h, last=c[-1] if c else None, gens=len(c), partial=fr[key].get("partial_generation_members"))
-conv_wse2 = [dict(g=int(r["generation"]), loss=float(r["best_so_far_score"]), evals=0) for r in fr["conventional_wse2"].get("generation_metrics", [])]
+_gm = [r for r in fr["conventional_wse2"].get("generation_metrics", []) if int(r.get("members", 50)) >= 50]  # complete generations only
+conv_wse2 = [dict(g=int(r["generation"]), loss=float(r["best_so_far_score"]), evals=0) for r in _gm]
 ev = 0
-for p, r in zip(conv_wse2, fr["conventional_wse2"].get("generation_metrics", [])):
+for p, r in zip(conv_wse2, _gm):
     ev += int(float(r["model_energy_evaluations"]))
     p["evals"] = ev
 fr["conventional_wse2_curve"] = conv_wse2
