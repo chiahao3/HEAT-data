@@ -1,0 +1,352 @@
+<title>HEAT-data Verification</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a single reading column (~72ch) with full-bleed figure rows; a verification dossier, not a dashboard. */
+:root {
+  --bg: #f7f8f9; --surface: #ffffff; --ink: #14171a; --ink-2: #4a5159; --ink-3: #737b84;
+  --rule: #dde1e5; --accent: #2a5f8f; --accent-soft: #e5edf5;
+  --heat: #2a78d6; --conv: #eb6834; --ref: #737b84;
+  --ok: #1f7a46; --ok-bg: #e3f2e9; --warn: #8a5a00; --warn-bg: #fbf0d9; --bad: #b3261e; --bad-bg: #fbe4e2;
+  --f-display: "Newsreader", Georgia, "Times New Roman", serif;
+  --f-body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121417; --surface: #1a1d21; --ink: #eceef0; --ink-2: #b9c0c7; --ink-3: #8b939b;
+  --rule: #2c3137; --accent: #7fb0e0; --accent-soft: #1d2a37;
+  --heat: #3987e5; --conv: #d95926; --ref: #8b939b;
+  --ok: #6fcf97; --ok-bg: #16281e; --warn: #e5b45c; --warn-bg: #2c2414; --bad: #f08a80; --bad-bg: #2f1a18; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #121417; --surface: #1a1d21; --ink: #eceef0; --ink-2: #b9c0c7; --ink-3: #8b939b;
+  --rule: #2c3137; --accent: #7fb0e0; --accent-soft: #1d2a37;
+  --heat: #3987e5; --conv: #d95926; --ref: #8b939b;
+  --ok: #6fcf97; --ok-bg: #16281e; --warn: #e5b45c; --warn-bg: #2c2414; --bad: #f08a80; --bad-bg: #2f1a18; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font: 15.5px/1.6 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 80px; }
+main { max-width: 980px; margin: 0 auto; display: grid; gap: 56px; }
+.col { max-width: 72ch; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 600; text-wrap: balance; line-height: 1.15; margin: 0; }
+h1 { font-size: clamp(2rem, 4.5vw, 2.9rem); letter-spacing: -0.01em; }
+h2 { font-size: 1.65rem; }
+h3 { font-size: 1.2rem; font-family: var(--f-body); font-weight: 600; }
+p { margin: 0; }
+section { display: grid; gap: 18px; min-width: 0; }
+.eyebrow { font: 500 0.75rem/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 22px; font: 0.82rem/1.5 var(--f-mono); color: var(--ink-2); }
+.meta b { color: var(--ink); font-weight: 500; }
+a { color: var(--accent); }
+code, .mono { font-family: var(--f-mono); font-size: 0.86em; }
+code { background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+.lede { font-size: 1.12rem; color: var(--ink-2); }
+.verdict { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 22px 24px; display: grid; gap: 14px; }
+.verdict p { max-width: 72ch; }
+.chip { display: inline-flex; align-items: center; gap: 6px; font: 600 0.72rem/1 var(--f-mono); letter-spacing: 0.04em; text-transform: uppercase;
+  padding: 5px 8px; border-radius: 999px; white-space: nowrap; }
+.chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.ok { color: var(--ok); background: var(--ok-bg); } .warn { color: var(--warn); background: var(--warn-bg); } .bad { color: var(--bad); background: var(--bad-bg); }
+.na { color: var(--ink-3); background: var(--accent-soft); }
+.tbl { overflow-x: auto; border: 1px solid var(--rule); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--rule); }
+th { font: 600 0.72rem/1.3 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); background: var(--bg); }
+tr:last-child td { border-bottom: 0; }
+td.num { font-variant-numeric: tabular-nums; font-family: var(--f-mono); font-size: 0.82rem; white-space: nowrap; }
+.figrow { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+figure { margin: 0; background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 14px 10px; display: grid; gap: 8px; min-width: 0; position: relative; }
+figcaption { font-size: 0.8rem; color: var(--ink-2); }
+figure .ttl { font: 600 0.86rem/1.3 var(--f-body); }
+svg.chart { width: 100%; height: auto; display: block; overflow: visible; }
+svg.chart text { fill: var(--ink-3); font: 10.5px var(--f-mono); }
+svg.chart .grid { stroke: var(--rule); stroke-width: 1; }
+svg.chart .axis { stroke: var(--ink-3); stroke-width: 1; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.78rem; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { display: inline-block; width: 16px; height: 0; border-top: 2px solid; }
+.legend i.dash { border-top-style: dashed; }
+.tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--bg); font: 0.74rem/1.4 var(--f-mono); padding: 6px 8px; border-radius: 6px; white-space: nowrap; z-index: 2; }
+.issues { display: grid; gap: 12px; }
+.issue { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; align-items: start; background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px; }
+.issue p { grid-column: 2; color: var(--ink-2); font-size: 0.92rem; min-width: 0; }
+.issue h3 { grid-column: 2; font-size: 1rem; }
+.issue .chip { grid-row: span 2; }
+ul.tight { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
+.note { font-size: 0.85rem; color: var(--ink-2); }
+details { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 16px; }
+summary { cursor: pointer; font-weight: 600; }
+summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 560px) { .issue { grid-template-columns: 1fr; } .issue p, .issue h3 { grid-column: 1; } .issue .chip { grid-row: auto; justify-self: start; } }
+</style>
+
+<main>
+<header class="col" style="display:grid;gap:14px">
+  <span class="eyebrow">Independent verification · arXiv:2610.28996</span>
+  <h1>HEAT-data Verification</h1>
+  <p class="lede">Does the public archive for <em>Hereditary Effective Atom Theory for Large-Scale Atomic Structure Prediction</em> run, and do its numbers hold up when recomputed from scratch?</p>
+  <div class="meta">
+    <span>repo <b>HEAT-data @ 385139c</b></span><span>branch <b>claude/verify-repo</b></span>
+    <span>cluster <b>altas (A100 MIG 2g.20gb)</b></span><span>model <b>UMA uma-s-1p1 / omat</b></span><span>date <b>__DATE__</b></span>
+  </div>
+</header>
+
+<section class="verdict">
+  <span class="eyebrow">Verdict</span>
+  <p><strong>The algorithm and the recorded results check out; the archive does not yet launch as documented.</strong>
+  Every number the paper quotes is reproduced from the bundled logs, with one unit slip in the H-sublattice text. The EAT-modified FAIRChem
+  patch behaves as the method requires on the real UMA model. The WSe<sub>2</sub> objective, its rescored losses and the Fig.&nbsp;4c correlations
+  reproduce to ~10<sup>−7</sup>. New searches run with production settings on our cluster once two small launch bugs are worked around.</p>
+  <p id="rerun-verdict">__RERUN_VERDICT__</p>
+</section>
+
+<section>
+  <div class="col" style="display:grid;gap:12px">
+    <span class="eyebrow">01 · What the repository is</span>
+    <h2>Code, inputs and recorded runs for three structure searches</h2>
+    <p>HEAT embeds Effective Atom Theory (EAT) in a genetic algorithm. Each site is a mixture of real species and a null species; positions and
+    mixture weights relax together under a UMA interatomic potential, a Tsallis entropy term (“syntropization”) drives sites to a single species or to
+    null, and the result is rounded and relaxed as ordinary atoms before scoring. Crossover halves both parents’ occupancies (κ = 0.5), superimposes
+    them in the shared cell, prunes overlaps and re-relaxes, so atoms from either parent can survive or vanish. The baseline is a conventional
+    hard-atom GA with cut-and-splice crossover and mutations.</p>
+    <p>The archive holds the HEAT drivers (3.2k–12k lines each), the conventional GAs, a launcher (<code>run_search.py</code>) with portable configs,
+    the inputs (Mg(BH<sub>4</sub>)<sub>2</sub> CIF, NIST Fe dislocation dumps, the experimental WSe<sub>2</sub> phase volume), the recorded logs/metrics
+    of every run in the paper, plotting scripts, and the FAIRChem patch that implements effective atoms. Model weights and per-generation structure
+    exports are not included.</p>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>Benchmark</th><th>Size</th><th>Objective</th><th>Paper’s claim</th></tr></thead>
+    <tbody>
+      <tr><td>H sublattice in Mg(BH<sub>4</sub>)<sub>2</sub></td><td class="num">240 H on 90-atom scaffold</td><td>formation energy + composition</td><td>HEAT reaches the relaxed reference at generation 2 (24,000 evals, 0.5 h); conventional GA 0.012 eV/H above it at generation 20</td></tr>
+      <tr><td>Fe edge-dislocation core</td><td class="num">364 active atoms, 605 fixed</td><td>formation energy + occupancy floor</td><td>HEAT reaches the reference at generation 4 (50,629 evals, 1.93 h); conventional GA 0.096 eV/core atom above it at generation 20</td></tr>
+      <tr><td>Twisted-bilayer WSe<sub>2</sub> from ptychography</td><td class="num">1497 atoms (1150 in crop)</td><td>E<sub>f</sub> + image Huber + composition + box</td><td>loss −0.35 (HEAT) vs 0.03 (conventional) at generation 128; Pearson 0.934 vs 0.124</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <div class="col" style="display:grid;gap:12px">
+    <span class="eyebrow">02 · Claims against evidence</span>
+    <h2>Each quantitative claim, recomputed</h2>
+    <p>“Recorded” means recomputed by our own parser from the archive’s logs and CSVs. “Recomputed” means re-evaluated from bundled structures with the
+    production code and the real UMA model. “Rerun” means a fresh search on our cluster.</p>
+  </div>
+  <div class="tbl"><table id="claims">
+    <thead><tr><th>Claim (paper)</th><th>Paper</th><th>Our value</th><th>Evidence</th><th>Status</th></tr></thead>
+    <tbody>__CLAIM_ROWS__</tbody>
+  </table></div>
+</section>
+
+<section>
+  <div class="col" style="display:grid;gap:12px">
+    <span class="eyebrow">03 · Convergence</span>
+    <h2>Recorded runs and our reruns</h2>
+    <p>Cumulative best formation-energy gap to each run’s own relaxed reference, per atom of the whole cell (the quantity the drivers use to detect a hit;
+    a gap ≤ 10<sup>−4</sup> eV/atom counts as reaching the reference). Solid lines are the archive’s runs; dashed lines are our reruns with the real
+    model on the cluster. Hover for values.</p>
+  </div>
+  <div class="figrow">
+    <figure><div class="ttl">H sublattice · gap to reference (eV/atom)</div><div class="legend" data-legend></div><svg class="chart" id="ch-h" viewBox="0 0 460 270" role="img" aria-label="H sublattice convergence"></svg><figcaption id="cap-h"></figcaption></figure>
+    <figure><div class="ttl">Fe edge dislocation · gap to reference (eV/atom)</div><div class="legend" data-legend></div><svg class="chart" id="ch-edge" viewBox="0 0 460 270" role="img" aria-label="Edge dislocation convergence"></svg><figcaption id="cap-edge"></figcaption></figure>
+  </div>
+  <figure><div class="ttl">WSe<sub>2</sub> · best loss vs interatomic-model evaluations</div><div class="legend" data-legend></div><svg class="chart" id="ch-wse2" viewBox="0 0 940 300" role="img" aria-label="WSe2 loss versus evaluations"></svg>
+    <figcaption>Plotted against cost, not generations. The dotted line is the guided reference bilayer (−0.3567), fitted to the data and relaxed under the
+    same objective; we rescored it with UMA to within 4×10<sup>−7</sup>. The conventional GA continues to generation 446 in the archive (682,069 evaluations, 25% more than HEAT used) and reaches 0.0199.</figcaption></figure>
+</section>
+
+<section>
+  <div class="col" style="display:grid;gap:12px">
+    <span class="eyebrow">04 · WSe<sub>2</sub> structure</span>
+    <h2>HEAT recovers two Se–W–Se trilayers and the twist angle</h2>
+    <p>The paper says the best HEAT structure “resolves the six atomic planes of two twisted Se–W–Se trilayers”. We tested that geometrically on the bundled
+    280×280 crops, against the independently registered guided reference. Heights are clustered into six planes; a W counts as trilayer-coordinated when it
+    has exactly three Se 1.2–2.2 Å above and three below within 2.9 Å.</p>
+  </div>
+  <figure><div class="ttl">Atom heights by species (count per 0.25 Å bin)</div><div class="legend" data-legend></div><svg class="chart" id="ch-z" viewBox="0 0 940 250" role="img" aria-label="Height histograms"></svg>
+    <figcaption>W in blue, Se in orange. The conventional GA’s structure has no layering; HEAT at generation 0 is two broad slabs.</figcaption></figure>
+  <div class="tbl"><table>
+    <thead><tr><th>Structure (central crop)</th><th>Atoms (W / Se)</th><th>Planes (W / Se pure?)</th><th>W with 3+3 Se</th><th>W–Se bond (median)</th><th>Twist between W layers</th></tr></thead>
+    <tbody id="geo-rows"></tbody>
+  </table></div>
+  <p class="note col">Pearson correlation of z-summed projections over the 280×280 display crop: 0.9344 (HEAT) and 0.1241 (conventional) from the bundled TIFFs,
+  0.9331 and 0.1233 when we re-render from the bundled cropped structures with the production renderer. The experimental crop is reproduced bit-for-bit from the raw TIFF.
+  In both HEAT and the guided reference, adjacent W layers are 7.5–8.0 Å apart, against about 6.5 Å in 2H-WSe<sub>2</sub>. The layer thickness and W–Se bond
+  length are bulk-like, so the larger spacing likely comes from the experimental depth scale and the 4 Å depth response. The paper does not discuss it.</p>
+</section>
+
+<section>
+  <div class="col" style="display:grid;gap:12px">
+    <span class="eyebrow">05 · Effective-atom implementation</span>
+    <h2>The FAIRChem patch does what EAT needs</h2>
+    <p>The archive ships the effective-atom implementation as a patch against FAIRChem <code>cce3699</code>. It applies cleanly. We tested its defining
+    properties on the real <code>uma-s-1p1</code> model and on FAIRChem’s own random-weight UMA-architecture test checkpoint.</p>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>Property</th><th>Test</th><th>Real UMA</th><th>Status</th></tr></thead>
+    <tbody id="eat-rows"></tbody>
+  </table></div>
+  <p class="note col">On the random-weight test checkpoint, a null site did shift the energy by 0.01–0.08 eV. That model caps neighbors at 20, and its untrained normalizer is not zero.
+  On the production model (cap 300) the shift disappears. A null site can still occupy one of the 300 neighbor slots when a region is very dense in effective sites;
+  a 6 Å sphere would need more than 0.33 sites/Å<sup>3</sup>. We did not observe this, but it is a limit of the representation worth stating.</p>
+</section>
+
+<section>
+  <div class="col" style="display:grid;gap:12px">
+    <span class="eyebrow">06 · Problems found</span>
+    <h2>What blocks reproduction today</h2>
+  </div>
+  <div class="issues">__ISSUES__</div>
+</section>
+
+<section>
+  <div class="col" style="display:grid;gap:12px">
+    <span class="eyebrow">07 · Code health</span>
+    <h2>Tests, configs and launch paths</h2>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>Check</th><th>Result</th><th>Status</th></tr></thead>
+    <tbody>__HEALTH_ROWS__</tbody>
+  </table></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Method × case</th><th>Config vs recorded parameters</th><th>Loads in driver</th><th><code>run_search.py</code> launch</th><th>Real-model run (ours)</th></tr></thead>
+    <tbody>__MATRIX_ROWS__</tbody>
+  </table></div>
+</section>
+
+<section>
+  <div class="col" style="display:grid;gap:12px">
+    <span class="eyebrow">08 · Effort to reproduce</span>
+    <h2>What a fresh reproduction costs</h2>
+    <p>Times are from the archive’s logs (two consumer GPUs for H and edge, one for WSe<sub>2</sub>) and from our runs on A100 MIG 2g.20gb slices, which are about
+    ten times slower per model evaluation.</p>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>Search</th><th>Generations</th><th>Model evaluations</th><th>Archive wall time</th><th>Over 24 h?</th></tr></thead>
+    <tbody>__COST_ROWS__</tbody>
+  </table></div>
+  <p class="note col">Setup that worked for us: conda Python 3.12, torch 2.8.0+cu126, FAIRChem <code>cce3699</code> with the bundled patch (editable install),
+  <code>setuptools&lt;81</code> (torchtnt still imports <code>pkg_resources</code>), access to the gated <code>facebook/UMA</code> weights, and a Materials Project key.
+  Elemental references come from today’s MP entries. W and Se match the archive exactly. For Fe and the Mg/B/H set they differ (see issues). For pure Fe
+  this only shifts every energy by a constant.</p>
+</section>
+
+<section>
+  <div class="col" style="display:grid;gap:12px">
+    <span class="eyebrow">09 · Method</span>
+    <h2>How this was checked</h2>
+    <ul class="tight">
+      <li>All computation ran as Slurm jobs on altas, with at most four jobs at once. CPU-only jobs hid the node’s GPUs. No local GPU was used.</li>
+      <li>The UMA checkpoint was downloaded on the workstation and only the model files were copied to the cluster. The Materials Project key was read at
+      run time on altas to fetch six elemental structures into a credential-free JSON. Neither credential is stored in the repository.</li>
+      <li>The drivers were run unmodified. A <code>sitecustomize</code> shim served the fetched MP structures, because the compute jobs get no MP key. Only the generation count,
+      worker count and GPU IDs were overridden. The conventional WSe<sub>2</sub> run used <code>transform_epsilon: 1.0e-06</code>.</li>
+      <li>All scripts, the session log and a proposed patch for the launch bugs are in <code>verification/</code> on branch <code>claude/verify-repo</code>.</li>
+    </ul>
+  </div>
+  <details><summary>Raw rerun data</summary><pre class="mono" id="raw" style="white-space:pre-wrap;font-size:0.75rem;overflow-x:auto"></pre></details>
+</section>
+</main>
+
+<script type="application/json" id="data">__DATA__</script>
+<script>
+(() => {
+  const D = JSON.parse(document.getElementById("data").textContent);
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent && parent.appendChild(e); return e; };
+  const fmt = (v, d = 4) => (v === null || v === undefined || Number.isNaN(v)) ? "–" : Number(v).toFixed(d);
+
+  function lineChart(svg, series, o) {
+    const W = +svg.viewBox.baseVal.width, H = +svg.viewBox.baseVal.height, m = { l: 58, r: 14, t: 10, b: 34 };
+    const xs = series.flatMap(s => s.pts.map(p => p.x)), ys = series.flatMap(s => s.pts.map(p => p.y));
+    const x0 = o.xmin ?? Math.min(...xs), x1 = o.xmax ?? Math.max(...xs);
+    const y0 = o.ymin ?? Math.min(...ys), y1 = o.ymax ?? Math.max(...ys);
+    const X = x => m.l + (x - x0) / (x1 - x0) * (W - m.l - m.r), Y = y => H - m.b - (Math.min(Math.max(y, y0), y1) - y0) / (y1 - y0) * (H - m.t - m.b);
+    for (const t of o.yticks) { el("line", { x1: m.l, x2: W - m.r, y1: Y(t), y2: Y(t), class: "grid" }, svg); el("text", { x: m.l - 6, y: Y(t) + 3.5, "text-anchor": "end" }, svg).textContent = o.yfmt(t); }
+    for (const t of o.xticks) { el("text", { x: X(t), y: H - m.b + 15, "text-anchor": "middle" }, svg).textContent = o.xfmt(t); }
+    el("line", { x1: m.l, x2: W - m.r, y1: H - m.b, y2: H - m.b, class: "axis" }, svg);
+    el("text", { x: (m.l + W - m.r) / 2, y: H - 4, "text-anchor": "middle" }, svg).textContent = o.xlabel;
+    for (const r of o.refs || []) {
+      el("line", { x1: m.l, x2: W - m.r, y1: Y(r.y), y2: Y(r.y), stroke: css("--ref"), "stroke-width": 1.5, "stroke-dasharray": "2 4" }, svg);
+      el("text", { x: W - m.r, y: Y(r.y) - 5, "text-anchor": "end" }, svg).textContent = r.label;
+    }
+    const pts = [];
+    for (const s of series) {
+      if (!s.pts.length) continue;
+      const d = s.pts.map((p, i) => (i ? "L" : "M") + X(p.x).toFixed(1) + " " + Y(p.y).toFixed(1)).join(" ");
+      el("path", { d, fill: "none", stroke: css(s.color), "stroke-width": 2, "stroke-dasharray": s.dash ? "6 4" : "none", "stroke-linejoin": "round" }, svg);
+      const last = s.pts[s.pts.length - 1];
+      el("circle", { cx: X(last.x), cy: Y(last.y), r: 4, fill: css(s.color), stroke: css("--surface"), "stroke-width": 2 }, svg);
+      for (const p of s.pts) pts.push({ sx: X(p.x), sy: Y(p.y), s, p });
+    }
+    const fig = svg.closest("figure"), leg = fig.querySelector("[data-legend]");
+    leg.innerHTML = series.filter(s => s.pts.length).map(s => `<span><i class="${s.dash ? "dash" : ""}" style="border-color:var(${s.color})"></i>${s.name}</span>`).join("") +
+      (o.refs || []).map(r => `<span><i class="dash" style="border-color:var(--ref);border-top-style:dotted"></i>${r.label}</span>`).join("");
+    const tip = document.createElement("div"); tip.className = "tip"; tip.hidden = true; fig.appendChild(tip);
+    const hit = el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: H - m.t - m.b, fill: "transparent" }, svg);
+    const dot = el("circle", { r: 5, fill: "none", stroke: css("--ink"), "stroke-width": 1.5, visibility: "hidden" }, svg);
+    hit.addEventListener("pointermove", ev => {
+      const r = svg.getBoundingClientRect(), k = W / r.width, mx = (ev.clientX - r.left) * k, my = (ev.clientY - r.top) * k;
+      let best = null, bd = 1e9; for (const q of pts) { const dd = (q.sx - mx) ** 2 + (q.sy - my) ** 2; if (dd < bd) { bd = dd; best = q; } }
+      if (!best) return; dot.setAttribute("cx", best.sx); dot.setAttribute("cy", best.sy); dot.setAttribute("visibility", "visible");
+      tip.hidden = false; tip.innerHTML = `${best.s.name}<br>${o.tip(best.p)}`;
+      const fr = fig.getBoundingClientRect(); tip.style.left = Math.min(ev.clientX - fr.left + 12, fr.width - tip.offsetWidth - 4) + "px"; tip.style.top = (ev.clientY - fr.top - 40) + "px";
+    });
+    hit.addEventListener("pointerleave", () => { tip.hidden = true; dot.setAttribute("visibility", "hidden"); });
+  }
+
+  const rec = D.recorded, rr = D.final_reruns;
+  const curve = (c, key = "gap") => (c || []).map(p => ({ x: p.g, y: p[key], ...p }));
+  const gapTip = p => `gen ${p.g} · gap ${fmt(p.gap, 5)} eV/atom<br>${(p.evals || 0).toLocaleString()} evals · ${fmt(p.hours, 2)} h`;
+  const gapOpts = (ymax, ticks, xmax) => ({ ymin: -0.005, ymax, yticks: ticks, yfmt: t => t.toFixed(2), xmin: 0, xmax, xticks: [0, 5, 10, 15, 20], xfmt: t => t, xlabel: "generation", tip: gapTip,
+    refs: [{ y: 0, label: "reference" }] });
+  const cut = (c, n) => c.filter(p => p.x <= n);
+  lineChart(document.getElementById("ch-h"), [
+    { name: "HEAT (archive)", color: "--heat", pts: cut(curve(rec.H.eat.curve), 20) },
+    { name: "Conventional (archive)", color: "--conv", pts: cut(curve(rec.H.ordinary.curve), 20) },
+    { name: "HEAT (rerun)", color: "--heat", dash: 1, pts: curve(rr.heat_h?.curve) },
+    { name: "Conventional (rerun)", color: "--conv", dash: 1, pts: curve(rr.conventional_h?.curve) },
+  ], gapOpts(0.16, [0, 0.05, 0.1, 0.15], 20));
+  lineChart(document.getElementById("ch-edge"), [
+    { name: "HEAT (archive)", color: "--heat", pts: curve(rec.edge.eat.curve) },
+    { name: "Conventional (archive)", color: "--conv", pts: cut(curve(rec.edge.ordinary.curve), 20) },
+    { name: "HEAT (rerun)", color: "--heat", dash: 1, pts: curve(rr.heat_edge?.curve) },
+  ], gapOpts(0.16, [0, 0.05, 0.1, 0.15], 20));
+  document.getElementById("cap-h").textContent = D.captions.h;
+  document.getElementById("cap-edge").textContent = D.captions.edge;
+  const wcur = c => c.map(p => ({ x: p.evals / 1000, y: p.loss, ...p }));
+  lineChart(document.getElementById("ch-wse2"), [
+    { name: "HEAT (archive, gen 0–128)", color: "--heat", pts: wcur(rec.wse2.eat) },
+    { name: "Conventional (archive, gen 0–446)", color: "--conv", pts: wcur(rec.wse2.ordinary) },
+    { name: "Conventional (rerun)", color: "--conv", dash: 1, pts: wcur(rr.conventional_wse2_curve || []) },
+  ], { ymin: -0.4, ymax: 0.2, yticks: [-0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2], yfmt: t => t.toFixed(1), xmin: 0, xmax: 700, xticks: [0, 100, 200, 300, 400, 500, 600, 700],
+       xfmt: t => t + "k", xlabel: "cumulative interatomic-model evaluations", refs: [{ y: -0.35666, label: "guided reference −0.3567" }],
+       tip: p => `gen ${p.g} · loss ${fmt(p.loss, 4)}<br>${p.evals.toLocaleString()} evals` });
+
+  // height histograms: small multiples
+  const G = D.wse2_free.D_geometry, order = [["heat_g128_crop", "HEAT gen 128"], ["guided_reference_crop", "Guided reference"], ["heat_g0_crop", "HEAT gen 0"], ["ordinary_g128_crop", "Conventional gen 128"]];
+  const svg = document.getElementById("ch-z"), W = 940, Hh = 250, pw = W / 4, z0 = 6, z1 = 22;
+  order.forEach(([k, name], i) => {
+    const g = el("g", { transform: `translate(${i * pw},0)` }, svg), m = { l: 34, r: 10, t: 18, b: 30 }, w = pw - m.l - m.r, h = Hh - m.t - m.b;
+    const hw = G[k].z_hist.W, hs = G[k].z_hist.Se, ymax = Math.max(...hw, ...hs, 1);
+    el("text", { x: m.l, y: 11 }, g).textContent = name;
+    const X = c => m.l + c / ymax * w, Y = z => m.t + (1 - (z - z0) / (z1 - z0)) * h;
+    for (const z of [8, 12, 16, 20]) { el("line", { x1: m.l, x2: m.l + w, y1: Y(z), y2: Y(z), class: "grid" }, g); el("text", { x: m.l - 5, y: Y(z) + 3.5, "text-anchor": "end" }, g).textContent = z; }
+    [["Se", hs, "--conv"], ["W", hw, "--heat"]].forEach(([sp, arr, col]) => arr.forEach((c, b) => {
+      const z = b * 0.25; if (!c || z < z0 || z > z1) return;
+      el("rect", { x: m.l, y: Y(z + 0.25) + 0.5, width: Math.max(1, X(c) - m.l), height: Math.max(1, Y(z) - Y(z + 0.25) - 1), fill: css(col), opacity: 0.85 }, g);
+    }));
+    el("line", { x1: m.l, x2: m.l, y1: m.t, y2: m.t + h, class: "axis" }, g);
+    el("text", { x: m.l + w / 2, y: Hh - 6, "text-anchor": "middle" }, g).textContent = "count →";
+  });
+  el("text", { x: 4, y: 14 }, svg).textContent = "";
+  document.querySelector("#ch-z").closest("figure").querySelector("[data-legend]").innerHTML =
+    `<span><i style="border-color:var(--heat);border-top-width:6px"></i>W</span><span><i style="border-color:var(--conv);border-top-width:6px"></i>Se</span><span class="note">vertical axis: height z (Å) in the 28 Å cell</span>`;
+  const gr = document.getElementById("geo-rows");
+  for (const [k, name] of order) {
+    const v = G[k], pure = v.planes.map(p => (p.W > 0.95 * p.n ? "W" : p.Se > 0.95 * p.n ? "Se" : "mix")).join(" / ");
+    gr.insertAdjacentHTML("beforeend", `<tr><td>${name}</td><td class="num">${v.atoms} (${v.W} / ${v.Se})</td><td class="num">${pure}</td><td class="num">${(100 * v.W_with_3_Se_above_and_3_below).toFixed(1)}%</td><td class="num">${v.W_Se_nn_median.toFixed(3)} Å</td><td class="num">${v.twist_between_W_layers_deg != null ? v.twist_between_W_layers_deg.toFixed(2) + "°" : "–"}</td></tr>`);
+  }
+  document.getElementById("eat-rows").innerHTML = D.eat_rows;
+  document.getElementById("raw").textContent = JSON.stringify(D.final_reruns, null, 1);
+})();
+</script>
