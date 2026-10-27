@@ -108,6 +108,20 @@ for d in sorted((RES / "real_runs").glob("*_job*")):
         info["seed"] = start.get("seed")
         if ref is not None:
             info.update(run_curve(log, ref))
+        else:  # WSe2 HEAT driver: loss curve from generation_done + per-member evaluation counts
+            evals_by_g = {}
+            for line in (log.parent / "running_log.txt").read_text().splitlines():
+                m = re.search(r"member_done generation=(\d+) .*energy_evaluations=(\d+)", line)
+                if m:
+                    evals_by_g[int(m.group(1))] = evals_by_g.get(int(m.group(1)), 0) + int(m.group(2))
+            ev, curve = 0, []
+            for e, fdict in parse_log(log):
+                if e == "generation_done":
+                    ev += evals_by_g.get(int(fdict["generation"]), 0)
+                    curve.append(dict(g=int(fdict["generation"]), loss=float(fdict["global_best_score"]), evals=ev))
+            info["loss_curve"] = curve
+            info["population"] = int(json.loads(next(iter(d.rglob("run_parameters.json"))).read_text()).get("resolved_parameters", {}).get("ga_population_size", 0) or 0) \
+                if next(iter(d.rglob("run_parameters.json")), None) else None
     gm = next(iter(d.rglob("generation_metrics.csv")), None)
     if gm is not None:
         with open(gm) as fh:

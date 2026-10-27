@@ -7,7 +7,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 D = json.loads(Path(sys.argv[1]).read_text())
 OUT = Path(sys.argv[2])
-FINAL = {"heat_h": "heat_h_job93325", "conventional_h": "conventional_h_job93326", "heat_edge": "heat_edge_job93319",
+FINAL = {"heat_h": "heat_h_job93325", "conventional_h": "conventional_h_job93326", "heat_edge": "heat_edge_job93725", "heat_edge_mig": "heat_edge_job93319",
          "conventional_wse2": "conventional_wse2_job93323", "heat_wse2": "heat_wse2_job93327"}
 A, RR = D["audit"], D["reruns"]
 
@@ -41,6 +41,7 @@ for p, r in zip(conv_wse2, _gm):
     ev += int(float(r["model_energy_evaluations"]))
     p["evals"] = ev
 fr["conventional_wse2_curve"] = conv_wse2
+fr["heat_wse2_curve"] = fr["heat_wse2"].get("loss_curve") or []
 
 
 def rerun_text(key, label):
@@ -54,7 +55,15 @@ def rerun_text(key, label):
     return f"{label} had not completed a generation when this report was built"
 
 
-parts = [rerun_text("heat_h", "HEAT H"), rerun_text("conventional_h", "conventional H"), rerun_text("heat_edge", "HEAT edge")]
+parts = [rerun_text("heat_h", "HEAT H"), rerun_text("conventional_h", "conventional H")]
+if hit["heat_edge"]["last"]:
+    parts.append(rerun_text("heat_edge", "HEAT edge (A100)"))
+else:
+    parts.append("the HEAT edge rerun ran out of GPU memory on a 20 GB MIG slice in its first crossover generation, hung instead of failing (issue below), and is queued again on a full A100")
+hw = fr["heat_wse2"].get("loss_curve") or []
+if hw:
+    parts.append(f"a reduced HEAT WSe<sub>2</sub> run (population 10, otherwise production settings) went from {hw[0]['loss']:.3f} to {hw[-1]['loss']:.3f} in {len(hw)} generations, "
+                 f"in line with the archive's {D['recorded']['wse2']['eat'][0]['loss']:.3f} → {D['recorded']['wse2']['eat'][1]['loss']:.3f} at population 50")
 if conv_wse2:
     parts.append(f"the conventional WSe<sub>2</sub> driver, with its YAML fixed, completed {len(conv_wse2)} generation(s) (best loss {conv_wse2[-1]['loss']:.4f}; archive at the same point: "
                  f"{D['recorded']['wse2']['ordinary'][len(conv_wse2) - 1]['loss']:.4f})")
@@ -81,6 +90,8 @@ claims = [
     ("H: conventional GA at generation 20", "0.012 eV/H (2.9 eV total)",
      f"{ho['at_generation_20']['gap_eV_per_atom']:.4f} eV/atom = {ho['at_generation_20']['gap_eV_per_H_atom']:.4f} eV/H = {ho['at_generation_20']['total_energy_gap_eV']:.2f} eV per 330-atom cell",
      "archive log; plot script’s own per-H formula", WARN("Unit slip")),
+    ("H: conventional GA in a fresh run, generation 20", "0.012 (per atom)", rerun_text("conventional_h", "rerun").replace("rerun ", ""), "rerun, real UMA, MP refs",
+     OK("Reproduced") if hit["conventional_h"]["last"] and not hit["conventional_h"]["hit"] and hit["conventional_h"]["gens"] >= 21 else NA("Running")),
     ("H: …after 91,000 evaluations and 1.6 h", "91,000 · 1.6 h", f"{ho['at_generation_20']['cumulative_evaluations']:,} · {ho['at_generation_20']['cumulative_wall_hours']:.2f} h", "archive log", OK()),
     ("H: conventional GA does not reach the reference", "not within 20 gens", f"reaches it at gen {ho['hit']['generation']} ({ho['hit']['cumulative_evaluations']:,} evals, {ho['hit']['cumulative_wall_hours']:.1f} h)",
      "archive log (100 gens)", WARN("Window-dependent")),
@@ -97,6 +108,10 @@ claims = [
     ("WSe<sub>2</sub>: HEAT 0.11 → −0.35, first at gen 115", "0.11 → −0.35 @115", f"{we['generation0_best']:.4f} → {we['at_128']['best_loss']:.4f}, first ≤ −0.35 at gen {we['first_generation_loss_le_m0p35']}", "archive metrics", OK()),
     ("WSe<sub>2</sub>: conventional 0.03 at gen 128", "0.03", f"{wo['at_128']['best_loss']:.4f} (0.0199 by gen 446)", "archive metrics", OK()),
     ("WSe<sub>2</sub>: E<sub>f</sub> −0.08 / −0.39 eV/atom; image 0.106 / 0.035", "", f"{wo['at_128']['formation_energy']:.3f} / {we['at_128']['formation_energy']:.3f}; {wo['at_128']['weighted_image_penalty']:.3f} / {we['at_128']['weighted_image_penalty']:.3f}", "archive metrics", OK()),
+    ("WSe<sub>2</sub>: HEAT driver runs with the real model", "–", (f"population 10: {hw[0]['loss']:.4f} → {hw[-1]['loss']:.4f} over {len(hw)} generations" if hw else "running"),
+     "rerun, reduced population", OK("Runs") if hw else NA("Running")),
+    ("WSe<sub>2</sub>: conventional driver, generation 0", "0.1569 (archive)", (f"{conv_wse2[0]['loss']:.4f} with {conv_wse2[0]['evals']:,} evals (archive 4,610)" if conv_wse2 else "running"),
+     "rerun, production settings, YAML fixed", OK("Consistent") if conv_wse2 else NA("Running")),
     ("WSe<sub>2</sub>: guided reference loss −0.3567", "−0.3567", f"{rs['final_guided_relaxed']['score']:.6f} (Δ {rs['final_guided_relaxed']['abs_diff_score']:.1e})", "rescored, real UMA", OK("Reproduced")),
     ("WSe<sub>2</sub>: ideal bilayer −0.42 eV/atom", "−0.42", f"{rs['previous_energy_only_relaxed']['formation_energy']:.5f} (Δ {rs['previous_energy_only_relaxed']['abs_diff_formation']:.1e})", "rescored, real UMA", OK("Reproduced")),
     ("WSe<sub>2</sub>: 540,000 vs 210,000 evaluations", "2.6×", f"{we['at_128']['cumulative_evaluations']:,} vs {wo['at_128']['cumulative_evaluations']:,} ({we['at_128']['cumulative_evaluations'] / wo['at_128']['cumulative_evaluations']:.2f}×)", "archive metrics", OK()),
@@ -116,6 +131,11 @@ issues = [
      "<code>transform_epsilon: 1e-06</code> in <code>discrete_09.30.26_wse2.yaml</code> is a string under PyYAML (YAML 1.1 needs a decimal point), so config validation crashes. "
      "This breaks <code>run_search.py conventional wse2</code> and the driver’s own unit tests. The source snapshot in <code>baseline_ptycho_guided_320/source/</code> has the working <code>1.0e-06</code>; "
      "the launcher’s <code>json.dumps</code> re-introduces the problem for any such float."),
+    (BAD("Robustness"), "A failed worker hangs the search instead of stopping it",
+     "When a worker raises (for us: CUDA out of memory on a 20 GB GPU while relaxing an edge crossover child, whose superposition roughly doubles the active sites), "
+     "the main process leaves the generation loop and its <code>finally: stop_ga_workers</code> joins workers that are blocked writing results into a queue nobody drains. "
+     "The job sat idle for 8 h with the traceback hidden; killing the workers surfaced it. Draining or terminating workers in the <code>finally</code> block would make failures visible. "
+     "Separately, plan for more than 20 GB of GPU memory per worker for the edge case (the archive used larger consumer GPUs)."),
     (WARN("Text"), "H-sublattice gap is reported per atom but labelled per H",
      f"At generation 20 the conventional GA is {ho['at_generation_20']['gap_eV_per_atom']:.4f} eV/atom above the reference, which is {ho['at_generation_20']['gap_eV_per_H_atom']:.4f} eV per H and "
      f"{ho['at_generation_20']['total_energy_gap_eV']:.2f} eV per 330-atom cell. The paper says 0.012 eV per H (2.9 eV total). Fig. 2b, which uses the plot script’s per-H conversion, should end near 0.016."),
@@ -165,6 +185,10 @@ def launch(key):
 
 
 def runstat(key, label_missing):
+    if key == "heat_wse2":
+        return OK(f"pop 10, {len(hw)} gens") if hw else NA("Running")
+    if key == "heat_edge" and not hit["heat_edge"]["last"]:
+        return BAD("OOM on MIG") + " " + NA("A100 queued")
     if key == "conventional_wse2":
         return OK(f"{len(conv_wse2)} gen{'s' if len(conv_wse2) != 1 else ''}, YAML fixed") if conv_wse2 else NA("Running")
     h = hit.get(key)
@@ -175,7 +199,7 @@ def runstat(key, label_missing):
 
 cl = D["config_loading"]
 matrix = []
-for m, c, rk, miss in [("heat", "h", "heat_h", ""), ("heat", "edge", "heat_edge", ""), ("heat", "wse2", None, "≈ 5 GPU-days; not rerun"),
+for m, c, rk, miss in [("heat", "h", "heat_h", ""), ("heat", "edge", "heat_edge", ""), ("heat", "wse2", "heat_wse2", ""),
                        ("conventional", "h", "conventional_h", ""), ("conventional", "edge", None, "> 24 h on MIG; archive log used"),
                        ("conventional", "wse2", "conventional_wse2", "")]:
     st = cl[f"{m}_{c}"]["status"]

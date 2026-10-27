@@ -318,6 +318,7 @@ summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outli
     { name: "HEAT (archive, gen 0–128)", color: "--heat", pts: wcur(rec.wse2.eat) },
     { name: "Conventional (archive, gen 0–446)", color: "--conv", pts: wcur(rec.wse2.ordinary) },
     { name: "Conventional (rerun)", color: "--conv", dash: 1, pts: wcur(rr.conventional_wse2_curve || []) },
+    { name: "HEAT (rerun, population 10)", color: "--heat", dash: 1, pts: wcur(rr.heat_wse2_curve || []) },
   ], { ymin: -0.4, ymax: 0.2, yticks: [-0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2], yfmt: t => t.toFixed(1), xmin: 0, xmax: 700, xticks: [0, 100, 200, 300, 400, 500, 600, 700],
        xfmt: t => t + "k", xlabel: "cumulative interatomic-model evaluations", refs: [{ y: -0.35666, label: "guided reference −0.3567" }],
        tip: p => `gen ${p.g} · loss ${fmt(p.loss, 4)}<br>${p.evals.toLocaleString()} evals` });
