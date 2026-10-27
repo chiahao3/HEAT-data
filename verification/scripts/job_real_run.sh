@@ -5,16 +5,8 @@ METHOD=$1; CASE=$2; GENS=$3; WORKERS=$4; GPUS=$5; FIX=${6:-}
 REPO=~/workspace/HEAT-data
 OUT=~/heat_verify/results/real_runs/${METHOD}_${CASE}_job${SLURM_JOB_ID}
 mkdir -p $OUT
-python - <<PY
-import json
-from pathlib import Path
-el = json.loads(Path("$HOME/heat_verify/results/rescore_real/elemental_structures.json").read_text())
-ref = json.loads(Path("$REPO/scripts/misc/baseline_ptycho_guided_320/inputs/reference_energies.json").read_text())
-for e in ref["elements"]:
-    el[e["symbol"]] = dict(e["structure"], material_id=e["material_id"])
-Path("$OUT/elemental_structures_served.json").write_text(json.dumps(el))
-PY
-[ "$CASE" = edge ] && python $REPO/verification/scripts/fit_fe_reference.py $OUT/elemental_structures_served.json
+# Exact Materials Project elemental structures (fetched once with the user's key; JSON holds no credentials)
+cp ~/heat_verify/results/mp_elements/mp_elemental_structures.json $OUT/elemental_structures_served.json
 export HEAT_ELEMENTAL_JSON=$OUT/elemental_structures_served.json MP_API_KEY=stub-no-network
 export PYTHONPATH=$REPO/verification/smoke${PYTHONPATH:+:$PYTHONPATH}
 read SCRIPT CFG < <(python $REPO/verification/scripts/real_config.py $REPO $METHOD $CASE $OUT $GENS $WORKERS $GPUS $FIX)
