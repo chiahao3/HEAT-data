@@ -1,0 +1,24 @@
+#!/bin/bash
+## Generic HEAT-verification job: runs "$@" inside the `heat` conda env.
+## Submit through verification/slurm/submit.sh, which caps this user's heat-* jobs at 4.
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --time=12:00:00
+#SBATCH --output=/home/fs01/cl2696/heat_verify/logs/%x_%j.txt
+
+pwd; hostname; date
+source ~/miniforge3/etc/profile.d/conda.sh
+conda activate heat
+export MPLCONFIGDIR=${TMPDIR:-/tmp}/mpl_$SLURM_JOB_ID
+## UMA weights were downloaded on the workstation and copied here (no token on the cluster).
+export HF_HUB_CACHE=$HOME/heat_verify/hf_cache FAIRCHEM_CACHE_DIR=$HOME/heat_verify/hf_cache HF_HUB_OFFLINE=1
+## Nodes do not cgroup-restrict GPUs: hide them unless this job was allocated one,
+## so CPU jobs never touch colleagues' GPUs.
+[ -z "${SLURM_JOB_GPUS:-}${SLURM_STEP_GPUS:-}" ] && export CUDA_VISIBLE_DEVICES=""
+nvidia-smi -L 2>/dev/null || echo "no GPU allocated"
+echo "+ $*"
+"$@"
+status=$?
+date
+echo "EXIT_STATUS=$status"
+exit $status
