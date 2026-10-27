@@ -137,6 +137,9 @@ for method in ("eat", "ordinary"):
         w[method]["_gens"] = [int(r["generation"]) for r in gm]
     w[method]["cumulative_best_curve"] = [float(b) for b in best]
     w[method]["cumulative_evaluations_curve"] = [int(c) for c in cum]
+    walls = np.cumsum([r["summed_member_wall_seconds"] for r in gm]) / 3600
+    w[method]["summed_member_wall_hours_total"] = float(walls[-1])
+    w[method]["summed_member_wall_hours_through_128"] = float(walls[[int(r["generation"]) for r in gm].index(128)])
 conv128 = w["ordinary"]["at_128"]["cumulative_evaluations"]
 gens, cum = w["eat"].pop("_gens"), np.asarray(w["eat"].pop("_cum"))
 g_budget = gens[int(np.searchsorted(cum, conv128))]

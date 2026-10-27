@@ -1,0 +1,21 @@
+Proposed minimal fixes for the two launch blockers found during verification (not applied to the archive code).
+
+--- a/run_search.py
++++ b/run_search.py
+@@
+-    output = (args.output_dir or Path(config["paths"]["output_dir"])).resolve()
+-    config["paths"]["output_dir"] = str(output)
+-    output.mkdir(parents=True, exist_ok=True)
+-    path = output / "portable_config.yaml"
++    output = (args.output_dir or Path(config["paths"]["output_dir"])).resolve()
++    config["paths"]["output_dir"] = str(output)
++    # Several drivers refuse an existing output directory, so keep the generated YAML beside it.
++    output.parent.mkdir(parents=True, exist_ok=True)
++    path = output.parent / f"{output.name}_portable_config.yaml"
+--- a/scripts/eat_genetic_scripts/discrete_09.30.26_wse2/discrete_09.30.26_wse2.yaml
++++ b/scripts/eat_genetic_scripts/discrete_09.30.26_wse2/discrete_09.30.26_wse2.yaml
+@@
+-  transform_epsilon: 1e-06
++  transform_epsilon: 1.0e-06
+(and in run_search.py, emit floats with repr() that always contains a '.' or use yaml.safe_dump, since json.dumps(1e-06)
+ gives '1e-06', which PyYAML/YAML 1.1 reads as a string.)

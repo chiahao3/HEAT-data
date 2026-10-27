@@ -9,8 +9,9 @@ if [ "$n" -ge "$MAX" ]; then echo "REFUSED: $n heat-* jobs already queued/runnin
 case "$KIND" in
   cpu)  RES=(--cpus-per-task=8 --mem=32G) ;;
   2g)   RES=(--gres=gpu:2g.20gb:1 --cpus-per-task=8 --mem=32G) ;;
+  2gx2) RES=(--gres=gpu:2g.20gb:2 --cpus-per-task=12 --mem=48G) ;;
   a100) RES=(--gres=gpu:a100:1 --cpus-per-task=16 --mem=64G) ;;
-  *) echo "kind must be cpu, 2g or a100"; exit 1 ;;
+  *) echo "kind must be cpu, 2g, 2gx2 or a100"; exit 1 ;;
 esac
 mkdir -p ~/heat_verify/logs
 sbatch --parsable --job-name="heat-$NAME" "${RES[@]}" ${SBATCH_EXTRA:-} "$(dirname "$0")/heat_job.sub" "$@"

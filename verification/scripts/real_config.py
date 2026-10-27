@@ -12,7 +12,7 @@ entry = json.loads((REPO / "configs" / f"{METHOD}_{CASE}.json").read_text())
 cfg = entry["config"]
 for section, key in entry["repository_paths"]:
     cfg[section][key] = str((REPO / cfg[section][key]).resolve())
-cfg["paths"]["output_dir"] = str(OUT)
+cfg["paths"]["output_dir"] = str(OUT / "run")  # several drivers refuse an existing output directory
 g = cfg["genetic"]
 g["generations"] = GENS
 if "parallel_workers" in g:

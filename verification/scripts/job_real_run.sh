@@ -14,6 +14,7 @@ for e in ref["elements"]:
     el[e["symbol"]] = dict(e["structure"], material_id=e["material_id"])
 Path("$OUT/elemental_structures_served.json").write_text(json.dumps(el))
 PY
+[ "$CASE" = edge ] && python $REPO/verification/scripts/fit_fe_reference.py $OUT/elemental_structures_served.json
 export HEAT_ELEMENTAL_JSON=$OUT/elemental_structures_served.json MP_API_KEY=stub-no-network
 export PYTHONPATH=$REPO/verification/smoke${PYTHONPATH:+:$PYTHONPATH}
 read SCRIPT CFG < <(python $REPO/verification/scripts/real_config.py $REPO $METHOD $CASE $OUT $GENS $WORKERS $GPUS $FIX)

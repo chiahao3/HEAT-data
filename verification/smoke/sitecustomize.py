@@ -15,7 +15,8 @@ if os.environ.get("HEAT_ELEMENTAL_JSON") and not os.environ.get("HEAT_SMOKE_CKPT
     _ELEMENTS = json.loads(open(os.environ["HEAT_ELEMENTAL_JSON"]).read())
 
     class _Summary:
-        def search(self, formula=None, material_ids=None, fields=None, **kw):
+        def search(self, formula=None, material_ids=None, fields=None, chemsys=None, **kw):
+            formula = formula or chemsys
             e = _ELEMENTS[str(formula)]
             atoms = Atoms(e["symbols"], positions=e["positions"], cell=e["cell"], pbc=True)
             return [{"material_id": e.get("material_id", f"substitute-{formula}"), "formula_pretty": str(formula),
@@ -25,6 +26,7 @@ if os.environ.get("HEAT_ELEMENTAL_JSON") and not os.environ.get("HEAT_SMOKE_CKPT
     class _StubMPRester:
         def __init__(self, *a, **k):
             self.materials = type("M", (), {"summary": _Summary()})()
+            self.summary = self.materials.summary  # newer mp_api spelling used by wse2_image_geometry.py
         def __enter__(self):
             return self
         def __exit__(self, *exc):
