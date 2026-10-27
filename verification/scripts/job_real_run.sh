@@ -13,7 +13,19 @@ read SCRIPT CFG < <(python $REPO/verification/scripts/real_config.py $REPO $METH
 cd $REPO
 echo "script=$SCRIPT config=$CFG out=$OUT"
 start=$(date +%s)
-python $SCRIPT --config $CFG > $OUT/driver_stdout.txt 2>&1; rc=$?
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+python $SCRIPT --config $CFG > $OUT/driver_stdout.txt 2>&1 &
+drv=$!
+## Watchdog: the drivers hang if a worker fails (see report). If no log line for WATCHDOG_MIN minutes,
+## kill the worker processes so the main process can surface the worker's traceback and exit.
+( while kill -0 $drv 2>/dev/null; do
+    sleep 300
+    log=$(find $OUT -name running_log.txt | head -1)
+    if [ -n "$log" ] && [ $(( $(date +%s) - $(stat -c %Y "$log") )) -gt $(( ${WATCHDOG_MIN:-60} * 60 )) ]; then
+      echo "WATCHDOG: no progress for ${WATCHDOG_MIN:-60} min; killing workers of $drv"; pkill -TERM -P $drv; sleep 120; kill -TERM $drv
+    fi
+  done ) &
+wait $drv; rc=$?
 echo "DRIVER_RC=$rc elapsed_s=$(( $(date +%s) - start ))"
 tail -30 $OUT/driver_stdout.txt
 exit $rc

@@ -87,10 +87,10 @@ claims = [
     ("H: …using 24,000 model evaluations and 0.5 h", "24,000 · 0.5 h", f"{he['hit']['cumulative_evaluations']:,} · {he['hit']['cumulative_wall_hours']:.2f} h", "archive log", OK()),
     ("H: HEAT reproduces this in a fresh run", "–", rerun_text("heat_h", "rerun").replace("rerun ", "") if hh or hit['heat_h']['last'] else "in progress",
      "rerun, real UMA, MP refs", OK("Reproduced") if hh else WARN("Not yet") if hit['heat_h']['last'] else NA("Running")),
-    ("H: conventional GA at generation 20", "0.012 eV/H (2.9 eV total)",
-     f"{ho['at_generation_20']['gap_eV_per_atom']:.4f} eV/atom = {ho['at_generation_20']['gap_eV_per_H_atom']:.4f} eV/H = {ho['at_generation_20']['total_energy_gap_eV']:.2f} eV per 330-atom cell",
-     "archive log; plot script’s own per-H formula", WARN("Unit slip")),
-    ("H: conventional GA in a fresh run, generation 20", "0.012 (per atom)", rerun_text("conventional_h", "rerun").replace("rerun ", ""), "rerun, real UMA, MP refs",
+    ("H: conventional GA at generation 20 (body text, p. 4)", "0.012 eV/H (2.9 eV total)",
+     f"{ho['at_generation_20']['gap_eV_per_H_atom']:.4f} eV/H ({ho['at_generation_20']['total_energy_gap_eV']:.2f} eV per cell); 0.0118 is the per-atom value",
+     "archive log; Fig. 2b shows ≈0.016 eV/H", WARN("Text error")),
+    ("H: conventional GA in a fresh run, generation 20", "0.0118 eV/atom (archive)", rerun_text("conventional_h", "rerun").replace("rerun ", ""), "rerun, real UMA, MP refs",
      OK("Reproduced") if hit["conventional_h"]["last"] and not hit["conventional_h"]["hit"] and hit["conventional_h"]["gens"] >= 21 else NA("Running")),
     ("H: …after 91,000 evaluations and 1.6 h", "91,000 · 1.6 h", f"{ho['at_generation_20']['cumulative_evaluations']:,} · {ho['at_generation_20']['cumulative_wall_hours']:.2f} h", "archive log", OK()),
     ("H: conventional GA does not reach the reference", "not within 20 gens", f"reaches it at gen {ho['hit']['generation']} ({ho['hit']['cumulative_evaluations']:,} evals, {ho['hit']['cumulative_wall_hours']:.1f} h)",
@@ -136,9 +136,19 @@ issues = [
      "the main process leaves the generation loop and its <code>finally: stop_ga_workers</code> joins workers that are blocked writing results into a queue nobody drains. "
      "The job sat idle for 8 h with the traceback hidden; killing the workers surfaced it. Draining or terminating workers in the <code>finally</code> block would make failures visible. "
      "Separately, plan for more than 20 GB of GPU memory per worker for the edge case (the archive used larger consumer GPUs)."),
-    (WARN("Text"), "H-sublattice gap is reported per atom but labelled per H",
-     f"At generation 20 the conventional GA is {ho['at_generation_20']['gap_eV_per_atom']:.4f} eV/atom above the reference, which is {ho['at_generation_20']['gap_eV_per_H_atom']:.4f} eV per H and "
-     f"{ho['at_generation_20']['total_energy_gap_eV']:.2f} eV per 330-atom cell. The paper says 0.012 eV per H (2.9 eV total). Fig. 2b, which uses the plot script’s per-H conversion, should end near 0.016."),
+    (WARN("Text fix"), "H-sublattice: one sentence reports a per-atom gap as per-H",
+     f"""<span>The conventional-GA gap at generation 20 in the body text is the logged per-atom value relabelled as per H. Fig. 2b itself is correct.</span>
+     <dl class="fix">
+       <dt>Where</dt><dd>Results, “Sublattice prediction” (page 4), the paragraph that begins “Figure 2b compares the cumulative best formation energies through generation 20”.</dd>
+       <dt>Wrong text</dt><dd><q>…whereas the conventional GA remains <mark>0.012 eV per H atom (2.9 eV total</mark> per primitive periodic cell of Mg(BH<sub>4</sub>)<sub>2</sub>) above it at generation 20.</q></dd>
+       <dt>Replace with</dt><dd><q>…whereas the conventional GA remains <ins>0.016 eV per H atom (3.9 eV total</ins> per primitive periodic cell of Mg(BH<sub>4</sub>)<sub>2</sub>) above it at generation 20.</q></dd>
+       <dt>Why</dt><dd>The drivers log formation energy per atom of the whole 330-atom cell (30 Mg + 60 B + 240 H). The logged gap is {ho['at_generation_20']['gap_eV_per_atom']:.5f} eV/atom.
+         Candidate and reference both contain 240 H in the same cell, so the gap is {ho['at_generation_20']['gap_eV_per_atom']:.5f} × 330 = {ho['at_generation_20']['total_energy_gap_eV']:.2f} eV in total,
+         or {ho['at_generation_20']['total_energy_gap_eV']:.2f} / 240 = {ho['at_generation_20']['gap_eV_per_H_atom']:.4f} eV per H. The text rounded the per-atom 0.0118 to 0.012, called it per H,
+         and multiplied by 240 to get 2.9 eV. Both numbers are low by 330/240 = 1.375.</dd>
+       <dt>Leave as is</dt><dd>Fig. 2b’s y-axis label “E<sub>best</sub> − E<sub>ref</sub> (eV/H atom)”, its caption (“normalized by the number of H atoms”), the plotted curve (the archived PNG ends near 0.016 at generation 20)
+         and <code>plot_h_sublattice_convergence.py</code> are consistent with each other. The conclusion is unaffected: the conventional GA is further from the reference than the text says.</dd>
+     </dl>"""),
     (WARN("Framing"), "The conventional GA does reach the H reference, later",
      f"The archived 100-generation run reaches the reference at generation {ho['hit']['generation']} after {ho['hit']['cumulative_evaluations']:,} evaluations ({ho['hit']['cumulative_wall_hours']:.1f} h), "
      "about 7× HEAT’s cost. The Results text is correct for the 20-generation window. The Discussion’s “fails to reach them over a longer search” fits the edge case but not H."),
@@ -155,7 +165,7 @@ issues = [
      f"{100 * ee['final_relax_unconverged_fraction']:.0f}% of HEAT edge members and {100 * he['final_relax_unconverged_fraction']:.0f}% of HEAT H members end their final FIRE relaxation at 500 steps without reaching f<sub>max</sub> = 0.05 eV/Å, "
      "and are scored as they are (the conventional logs do not record this). The reference-hitting candidates are converged, so the conclusions stand, but unconverged scores are biased high."),
 ]
-issue_html = "".join(f'<div class="issue">{c}<h3>{t}</h3><p>{b}</p></div>' for c, t, b in issues)
+issue_html = "".join(f'<div class="issue">{c}<h3>{t}</h3><div class="body">{b}</div></div>' for c, t, b in issues)
 
 # ---------------------------------------------------------------- health + matrix + cost
 tests = D["repo_tests"]
