@@ -41,3 +41,4 @@ Started: 2026-10-26
   - HEAT edge rerun on MIG (93319): gen 0 OK (2.7 h), then **CUDA OOM on the 20 GB MIG slice** in a gen-1 crossover child (superposition doubles active sites) and the driver **deadlocked silently for 8 h**: main raised on the worker failure, `finally: stop_ga_workers` joins workers whose result-queue feeder threads block on an undrained pipe. Killing the workers surfaced the OOM traceback. => repo robustness bug (worker failure -> hang, error hidden) + memory requirement >20 GB for edge crossover.
   - Requeued HEAT edge on a full A100 80GB (93725, gens 0-5, 2 workers on GPU 0); A100s currently all busy with other users.
 - Published interim report: https://claude.ai/artifact/RJSmvYHm7pVdfrQHfX3aDj (snapshot in verification/report/).
+- Forked jt577/HEAT-data to chiahao3/HEAT-data (public, as upstream) at user's request; pushed branch claude/verify-repo (pre-push scan: no token patterns, no MP-key match, no large files).
